@@ -2,10 +2,8 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-turnos',
-  imports: [],
+  standalone: true,
   templateUrl: './turnos.html',
   styleUrl: './turnos.css'
 })
-export class Turnos {
-
-}
+export class Turnos {}
