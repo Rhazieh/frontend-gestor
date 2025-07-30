@@ -1,0 +1,25 @@
+/* Acá le damos el estilo visual a la barra de navegación (navbar) */
+
+nav {
+  display: flex; /* Acomodamos elementos horizontalmente */
+  justify-content: space-between; /* Título a la izquierda, links a la derecha */
+  align-items: center; /* Centramos verticalmente */
+  background-color: #2196f3; /* Azul medio, color típico de app */
+  padding: 1rem; /* Espaciado interno */
+  color: white; /* Texto blanco */
+}
+
+.titulo {
+  font-weight: bold; /* Que se note el nombre */
+  font-size: 1.2rem; /* Tamaño de letra más grande */
+}
+
+.links a {
+  margin-left: 1rem; /* Espacio entre los enlaces */
+  color: white; /* Que se vean sobre el fondo azul */
+  text-decoration: none; /* Sacamos el subrayado por defecto */
+}
+
+.links a.activo {
+  border-bottom: 2px solid white; /* Subrayado blanco cuando está activa la ruta */
+}
