@@ -1,4 +1,24 @@
-<!-- Vista de turnos -->
+<h2>Listado de Turnos</h2>
 
-<h2>Turnos</h2>
-<p>Aquí se van a listar los turnos de cada paciente.</p>
+<!-- Si no hay turnos cargados, mostramos un mensaje -->
+<p *ngIf="turnos.length === 0">No hay turnos disponibles.</p>
+
+<!-- Si hay turnos, los mostramos en una tabla -->
+<table *ngIf="turnos.length > 0">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Paciente</th>
+      <th>Fecha</th>
+      <th>Motivo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let turno of turnos">
+      <td>{{ turno.id }}</td>
+      <td>{{ turno.paciente.nombre }}</td>
+      <td>{{ turno.fecha }}</td>
+      <td>{{ turno.razon }}</td>
+    </tr>
+  </tbody>
+</table>

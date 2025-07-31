@@ -1,3 +1,31 @@
-<!-- Esta es la vista de pacientes -->
+<!-- Vista de Pacientes -->
+
 <h2>Listado de Pacientes</h2>
-<p>Acá más adelante se va a mostrar la tabla con todos los pacientes registrados.</p>
+
+<!-- Si no hay pacientes, mostramos un mensaje -->
+<div *ngIf="pacientes.length === 0">
+  <p>No hay pacientes registrados por ahora.</p>
+</div>
+
+<!-- Si hay pacientes, mostramos una tabla -->
+<table *ngIf="pacientes.length > 0">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Email</th>
+      <th>Teléfono</th>
+      <th>Turnos (cantidad)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Recorremos la lista de pacientes y mostramos cada uno -->
+    <tr *ngFor="let paciente of pacientes">
+      <td>{{ paciente.id }}</td>
+      <td>{{ paciente.nombre }}</td>
+      <td>{{ paciente.email }}</td>
+      <td>{{ paciente.telefono }}</td>
+      <td>{{ paciente.turnos?.length || 0 }}</td>
+    </tr>
+  </tbody>
+</table>

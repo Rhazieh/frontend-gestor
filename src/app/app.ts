@@ -1,17 +1,21 @@
-// Este archivo es el corazón de la aplicación. Es el componente raíz, el que se monta primero cuando carga el frontend.
+// Este es el componente principal de Angular. Es como el "main" del frontend.
+// Acá se configura qué cosas se importan, el HTML base y el estilo general.
+// Usamos el decorador @Component para indicarle que esta clase es un componente Angular.
 
-import { Component, signal } from '@angular/core'; // importamos lo necesario para que esto sea un componente y para usar signals (como una variable reactiva)
-import { RouterOutlet } from '@angular/router'; // esto permite que las vistas cambien según la ruta, sin recargar la página
-import { Navbar } from './navbar/navbar'; // importamos el navbar que creamos para mostrarlo en todas las vistas
+import { Component, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router'; // Necesario para poder renderizar las rutas
+import { Navbar } from './navbar/navbar'; // Importamos el navbar para que se vea en todas las vistas
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
-  selector: 'app-root', // este nombre se usa como etiqueta HTML <app-root>, y Angular la reemplaza por este componente
-  standalone: true, // esto indica que es un componente independiente, no necesita estar en un módulo
-  imports: [RouterOutlet, Navbar], // acá indicamos los componentes que se usan dentro de este (como <router-outlet> y <app-navbar>)
-  templateUrl: './app.html', // el HTML que va a renderizarse
-  styleUrl: './app.css' // el estilo propio de este componente (aunque por ahora está vacío)
+  selector: 'app-root', // Nombre de etiqueta que se usa en index.html
+  standalone: true,     // Esto indica que este componente es independiente (forma moderna)
+  imports: [RouterOutlet, Navbar, HttpClientModule],
+  templateUrl: './app.html',       // HTML que se va a renderizar
+  styleUrl: './app.css'            // Estilos propios del componente
 })
 export class App {
-  // usamos signal() para crear una variable reactiva, aunque ahora solo muestra el título por si se usa más adelante
+  // Signal es como una variable reactiva (parecido a BehaviorSubject en RxJS o a useState en React)
+  // Por ahora no la usamos mucho, pero sirve para actualizar valores en tiempo real si queremos.
   protected readonly title = signal('frontend-gestor');
 }

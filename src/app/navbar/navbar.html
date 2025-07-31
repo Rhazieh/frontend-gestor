@@ -1,13 +1,11 @@
-<!-- Esta es la estructura visual del navbar que se muestra arriba en todas las vistas -->
+<!-- Acá va el navbar fijo arriba de toda la aplicación.
+     Sirve para cambiar entre la vista de pacientes y la de turnos.
+     Usa routerLink para que Angular cambie de ruta sin recargar la página. -->
 
 <nav>
-  <!-- Título del sistema, lo mostramos a la izquierda -->
-  <span class="titulo">Gestor de Turnos</span>
+  <!-- Botón que te lleva a la vista de pacientes -->
+  <a routerLink="/pacientes" routerLinkActive="active">Pacientes</a>
 
-  <!-- Enlaces para navegar entre vistas. 
-       Cuando una ruta está activa, se aplica la clase 'activo' -->
-  <div class="links">
-    <a routerLink="/pacientes" routerLinkActive="activo">Pacientes</a>
-    <a routerLink="/turnos" routerLinkActive="activo">Turnos</a>
-  </div>
+  <!-- Botón que te lleva a la vista de turnos -->
+  <a routerLink="/turnos" routerLinkActive="active">Turnos</a>
 </nav>

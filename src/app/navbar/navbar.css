@@ -1,25 +1,21 @@
-/* Acá le damos el estilo visual a la barra de navegación (navbar) */
+/* Estilos básicos para que el navbar se vea presentable.
+   Le damos color de fondo, un poco de padding y alineamos los enlaces. */
 
 nav {
-  display: flex; /* Acomodamos elementos horizontalmente */
-  justify-content: space-between; /* Título a la izquierda, links a la derecha */
-  align-items: center; /* Centramos verticalmente */
-  background-color: #2196f3; /* Azul medio, color típico de app */
-  padding: 1rem; /* Espaciado interno */
-  color: white; /* Texto blanco */
+  background-color: #1976d2; /* azul similar a Angular Material */
+  padding: 1rem;
+  display: flex;
+  gap: 1rem;
 }
 
-.titulo {
-  font-weight: bold; /* Que se note el nombre */
-  font-size: 1.2rem; /* Tamaño de letra más grande */
+/* Estilo para los enlaces del navbar */
+nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
 }
 
-.links a {
-  margin-left: 1rem; /* Espacio entre los enlaces */
-  color: white; /* Que se vean sobre el fondo azul */
-  text-decoration: none; /* Sacamos el subrayado por defecto */
-}
-
-.links a.activo {
-  border-bottom: 2px solid white; /* Subrayado blanco cuando está activa la ruta */
+/* Cuando un enlace está activo (es la vista actual), lo marcamos distinto */
+nav a.active {
+  text-decoration: underline;
 }
