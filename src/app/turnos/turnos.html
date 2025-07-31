@@ -1,3 +1,12 @@
+<!-- turnos.html -->
+
+<!-- Filtro por fecha -->
+<label>
+  Filtrar por fecha:
+  <input type="date" [(ngModel)]="filtroFecha" name="filtroFecha" />
+</label>
+<br />
+
 <h2>Lista de Turnos</h2>
 
 <table>
@@ -12,13 +21,14 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let turno of turnos">
+    <tr *ngFor="let turno of turnosFiltrados">
       <td>{{ turno.id }}</td>
       <td>{{ turno.fecha | date:'yyyy-MM-dd' }}</td>
       <td>{{ turno.hora }}</td>
       <td>{{ turno.razon }}</td>
-      <td>{{ turno.paciente?.nombre }}</td>
+      <td>{{ turno.paciente?.nombre || 'Sin asignar' }}</td>
       <td>
+        <button (click)="editarTurno(turno)">Editar</button>
         <button (click)="eliminarTurno(turno.id)">Eliminar</button>
       </td>
     </tr>
@@ -48,11 +58,45 @@
   <label>
     Paciente:
     <select [(ngModel)]="nuevoTurno.pacienteId" name="pacienteId" required>
-      <option *ngFor="let paciente of pacientes" [value]="paciente.id">
+      <option [ngValue]="null" disabled>-- Seleccionar paciente --</option>
+      <option *ngFor="let paciente of pacientes" [ngValue]="paciente.id">
         {{ paciente.nombre }}
       </option>
     </select>
   </label>
   <br />
   <button type="submit">Crear Turno</button>
+</form>
+
+<hr />
+
+<h3>Editar Turno</h3>
+
+<form *ngIf="turnoEditando" (ngSubmit)="guardarEdicion()" #formEdit="ngForm">
+  <label>
+    Fecha:
+    <input type="date" [(ngModel)]="turnoEditando.fecha" name="editFecha" required />
+  </label>
+  <br />
+  <label>
+    Hora:
+    <input type="time" [(ngModel)]="turnoEditando.hora" name="editHora" required />
+  </label>
+  <br />
+  <label>
+    Razón:
+    <input type="text" [(ngModel)]="turnoEditando.razon" name="editRazon" required />
+  </label>
+  <br />
+  <label>
+    Paciente:
+    <select [(ngModel)]="turnoEditando.paciente.id" name="editPacienteId" required>
+      <option *ngFor="let paciente of pacientes" [ngValue]="paciente.id">
+        {{ paciente.nombre }}
+      </option>
+    </select>
+  </label>
+  <br />
+  <button type="submit">Guardar Cambios</button>
+  <button type="button" (click)="cancelarEdicion()">Cancelar</button>
 </form>

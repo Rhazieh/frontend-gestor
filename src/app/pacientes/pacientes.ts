@@ -1,63 +1,124 @@
-// Este componente se encarga de mostrar la lista de pacientes.
-// También permite crear nuevos pacientes con un formulario simple.
+// Este componente maneja todo lo relacionado a los pacientes:
+// muestra los pacientes existentes, permite crearlos, editarlos y eliminarlos.
 
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // Necesario para usar [(ngModel)]
-import { PacientesService } from './pacientes.service'; // Servicio que se conecta con el backend
-import { Paciente } from '../models/paciente'; // Modelo con la estructura de un paciente
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { Paciente } from '../models/paciente';
+import { Turno } from '../models/turno'; // Importamos para verificar si un paciente tiene turnos
 
 @Component({
-  selector: 'app-pacientes', // Esta es la etiqueta que representa este componente
-  standalone: true,          // Usamos el modo moderno sin NgModules
-  imports: [CommonModule, FormsModule], // CommonModule para *ngFor, FormsModule para [(ngModel)]
+  selector: 'app-pacientes',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './pacientes.html',
   styleUrl: './pacientes.css'
 })
 export class Pacientes {
-  // Array donde vamos a guardar todos los pacientes que vienen del backend
+  private http = inject(HttpClient);
+
   pacientes: Paciente[] = [];
 
-  // Objeto temporal donde se guarda lo que el usuario escribe en el formulario
+  // Formulario de creación
   nuevoPaciente: Partial<Paciente> = {
     nombre: '',
     email: '',
     telefono: ''
   };
 
-  // Inyectamos el servicio que se comunica con el backend
-  constructor(private pacientesService: PacientesService) {}
+  // Formulario de edición
+  pacienteEditando: Paciente | null = null;
 
-  // Apenas se carga el componente, pedimos todos los pacientes
-  ngOnInit(): void {
-    this.pacientesService.getPacientes().subscribe({
+  constructor() {
+    this.cargarPacientes();
+  }
+
+  // ========================
+  // Traer todos los pacientes
+  // ========================
+  cargarPacientes(): void {
+    this.http.get<Paciente[]>('http://localhost:3000/pacientes').subscribe({
       next: (data) => {
-        console.log('Pacientes recibidos:', data); // Por si queremos ver en consola
-        this.pacientes = data; // Guardamos los datos en el array
+        this.pacientes = data;
+        console.log('Pacientes cargados:', data);
       },
-      error: (err) => console.error('Error al obtener pacientes:', err)
+      error: (err) => console.error('Error al cargar pacientes:', err)
     });
   }
 
-  // Esta función se ejecuta cuando el usuario envía el formulario
+  // ========================
+  // Crear nuevo paciente
+  // ========================
   crearPaciente(): void {
-    this.pacientesService.crearPaciente(this.nuevoPaciente).subscribe({
+    this.http.post<Paciente>('http://localhost:3000/pacientes', this.nuevoPaciente).subscribe({
       next: (pacienteCreado) => {
-        console.log('Paciente creado:', pacienteCreado); // Debug
-        this.pacientes.push(pacienteCreado); // Lo agregamos a la tabla directamente
-        // Limpiamos el formulario para que se puedan seguir creando más pacientes
+        this.pacientes.push(pacienteCreado);
         this.nuevoPaciente = { nombre: '', email: '', telefono: '' };
       },
       error: (err) => console.error('Error al crear paciente:', err)
     });
   }
+
+  // ========================
+  // Eliminar paciente (con verificación de turnos asignados)
+  // ========================
   eliminarPaciente(id: number): void {
-  this.pacientesService.eliminarPaciente(id).subscribe({
-    next: () => {
-      console.log('Paciente eliminado con ID:', id);
-      this.pacientes = this.pacientes.filter(p => p.id !== id); // Lo sacamos de la lista
-    },
-    error: (err) => console.error('Error al eliminar paciente:', err)
-  });
-}
+    // Primero vemos si tiene turnos asignados antes de borrarlo
+    this.http.get<Turno[]>('http://localhost:3000/turnos').subscribe({
+      next: (turnos) => {
+        const tieneTurnos = turnos.some(t => t.paciente?.id === id);
+
+        const mensaje = tieneTurnos
+          ? '⚠️ Este paciente tiene turnos asignados. ¿Estás seguro de que querés eliminarlo?'
+          : '¿Estás seguro de que querés eliminar este paciente?';
+
+        if (confirm(mensaje)) {
+          this.http.delete<void>(`http://localhost:3000/pacientes/${id}`).subscribe({
+            next: () => {
+              this.pacientes = this.pacientes.filter(p => p.id !== id);
+              console.log(`Paciente con ID ${id} eliminado`);
+            },
+            error: (err) => console.error('Error al eliminar paciente:', err)
+          });
+        }
+      },
+      error: (err) => console.error('Error al verificar turnos del paciente:', err)
+    });
+  }
+
+  // ========================
+  // Seleccionar paciente para editar
+  // ========================
+  editarPaciente(paciente: Paciente): void {
+    this.pacienteEditando = { ...paciente }; // Clonamos para no modificar directamente
+  }
+
+  // ========================
+  // Confirmar edición
+  // ========================
+  actualizarPaciente(): void {
+    if (!this.pacienteEditando) return;
+
+    this.http.patch<Paciente>(
+      `http://localhost:3000/pacientes/${this.pacienteEditando.id}`,
+      this.pacienteEditando
+    ).subscribe({
+      next: (pacienteActualizado) => {
+        const index = this.pacientes.findIndex(p => p.id === pacienteActualizado.id);
+        if (index !== -1) {
+          this.pacientes[index] = pacienteActualizado;
+        }
+        this.pacienteEditando = null;
+      },
+      error: (err) => console.error('Error al actualizar paciente:', err)
+    });
+  }
+
+  // ========================
+  // Cancelar edición
+  // ========================
+  cancelarEdicion(): void {
+    this.pacienteEditando = null;
+  }
 }
