@@ -1,24 +1,58 @@
-<h2>Listado de Turnos</h2>
+<h2>Lista de Turnos</h2>
 
-<!-- Si no hay turnos cargados, mostramos un mensaje -->
-<p *ngIf="turnos.length === 0">No hay turnos disponibles.</p>
-
-<!-- Si hay turnos, los mostramos en una tabla -->
-<table *ngIf="turnos.length > 0">
+<table>
   <thead>
     <tr>
       <th>ID</th>
-      <th>Paciente</th>
       <th>Fecha</th>
-      <th>Motivo</th>
+      <th>Hora</th>
+      <th>Razón</th>
+      <th>Paciente</th>
+      <th>Acciones</th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let turno of turnos">
       <td>{{ turno.id }}</td>
-      <td>{{ turno.paciente.nombre }}</td>
-      <td>{{ turno.fecha }}</td>
+      <td>{{ turno.fecha | date:'yyyy-MM-dd' }}</td>
+      <td>{{ turno.hora }}</td>
       <td>{{ turno.razon }}</td>
+      <td>{{ turno.paciente?.nombre }}</td>
+      <td>
+        <button (click)="eliminarTurno(turno.id)">Eliminar</button>
+      </td>
     </tr>
   </tbody>
 </table>
+
+<hr />
+
+<h3>Crear Turno</h3>
+
+<form (ngSubmit)="crearTurno()" #formTurno="ngForm">
+  <label>
+    Fecha:
+    <input type="date" [(ngModel)]="nuevoTurno.fecha" name="fecha" required />
+  </label>
+  <br />
+  <label>
+    Hora:
+    <input type="time" [(ngModel)]="nuevoTurno.hora" name="hora" required />
+  </label>
+  <br />
+  <label>
+    Razón:
+    <input type="text" [(ngModel)]="nuevoTurno.razon" name="razon" required />
+  </label>
+  <br />
+  <label>
+    Paciente:
+    <select [(ngModel)]="nuevoTurno.pacienteId" name="pacienteId" required>
+      <option *ngFor="let paciente of pacientes" [value]="paciente.id">
+        {{ paciente.nombre }}
+      </option>
+    </select>
+  </label>
+  <br />
+  <button type="submit">Crear Turno</button>
+</form>

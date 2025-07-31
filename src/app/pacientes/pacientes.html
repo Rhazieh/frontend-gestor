@@ -1,31 +1,54 @@
-<!-- Vista de Pacientes -->
+<!-- Título principal de la vista -->
+<h2>Lista de Pacientes</h2>
 
-<h2>Listado de Pacientes</h2>
-
-<!-- Si no hay pacientes, mostramos un mensaje -->
-<div *ngIf="pacientes.length === 0">
-  <p>No hay pacientes registrados por ahora.</p>
-</div>
-
-<!-- Si hay pacientes, mostramos una tabla -->
-<table *ngIf="pacientes.length > 0">
+<!-- Tabla donde se muestra cada paciente -->
+<table>
   <thead>
     <tr>
       <th>ID</th>
       <th>Nombre</th>
       <th>Email</th>
       <th>Teléfono</th>
-      <th>Turnos (cantidad)</th>
+      <th>Turnos</th>
+      <th>Acciones</th> <!-- Columna para el botón eliminar -->
     </tr>
   </thead>
   <tbody>
-    <!-- Recorremos la lista de pacientes y mostramos cada uno -->
+    <!-- Recorremos el array de pacientes con *ngFor -->
     <tr *ngFor="let paciente of pacientes">
       <td>{{ paciente.id }}</td>
       <td>{{ paciente.nombre }}</td>
       <td>{{ paciente.email }}</td>
       <td>{{ paciente.telefono }}</td>
-      <td>{{ paciente.turnos?.length || 0 }}</td>
+      <td>{{ paciente.turnos.length }}</td>
+      <td>
+        <!-- Botón que llama al método eliminarPaciente() con el id del paciente -->
+        <button (click)="eliminarPaciente(paciente.id)">Eliminar</button>
+      </td>
     </tr>
   </tbody>
 </table>
+
+<hr />
+
+<!-- Formulario para crear un nuevo paciente -->
+<h3>Nuevo Paciente</h3>
+
+<form (ngSubmit)="crearPaciente()">
+  <label>
+    Nombre:
+    <input type="text" [(ngModel)]="nuevoPaciente.nombre" name="nombre" required />
+  </label>
+  <br />
+  <label>
+    Email:
+    <input type="email" [(ngModel)]="nuevoPaciente.email" name="email" required />
+  </label>
+  <br />
+  <label>
+    Teléfono:
+    <input type="text" [(ngModel)]="nuevoPaciente.telefono" name="telefono" required />
+  </label>
+  <br />
+  <button type="submit">Crear</button>
+</form>
