@@ -20,7 +20,7 @@
       <td>{{ paciente.turnos?.length || 0 }}</td>
       <td>
         <button (click)="editarPaciente(paciente)">Editar</button>
-        <button (click)="eliminarPaciente(paciente.id)">Eliminar</button>
+        <button class="eliminar" (click)="eliminarPaciente(paciente.id)">Eliminar</button>
       </td>
     </tr>
   </tbody>

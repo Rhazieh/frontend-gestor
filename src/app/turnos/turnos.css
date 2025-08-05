@@ -1,59 +1,38 @@
-/* Estilos generales para la vista de turnos */
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-  font-family: Arial, sans-serif;
+/* Componentes pacientes y turnos */
+form {
+  background-color: #2a2a3d;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  border: 1px solid #444;
+  max-width: 600px;
 }
 
-th, td {
-  border: 1px solid #ccc;
-  padding: 8px 12px;
-  text-align: left;
+input, select {
+  background-color: #2f2f45;
+  color: #f0f0f0;
+  border: 1px solid #555;
 }
 
-th {
-  background-color: #e0f0ff;
+input:focus, select:focus {
+  border-color: #8f7ce2;
 }
 
 button {
-  padding: 5px 10px;
-  background-color: #d9534f;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #c9302c;
-}
-
-/* Estilo del formulario de crear turno */
-
-form {
-  display: flex;
-  flex-direction: column;
-  max-width: 400px;
-  gap: 10px;
-}
-
-form label {
+  background-color: #5b3cc4;
+  color: #fff;
   font-weight: bold;
 }
 
-form input,
-form select {
-  padding: 6px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+button:hover {
+  background-color: #6d4ee6;
+}
+/* Botón eliminar rojo */
+button.eliminar {
+  background-color: #c44545;
+  margin-left: 10px;
 }
 
-form button[type="submit"] {
-  background-color: #5cb85c;
-}
-
-form button[type="submit"]:hover {
-  background-color: #4cae4c;
+button.eliminar:hover {
+  background-color: #e74c3c;
 }

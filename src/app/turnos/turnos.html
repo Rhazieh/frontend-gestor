@@ -27,7 +27,7 @@
       <td>{{ turno.paciente?.nombre || 'Sin asignar' }}</td>
       <td>
         <button (click)="editarTurno(turno)">Editar</button>
-        <button (click)="eliminarTurno(turno.id)">Eliminar</button>
+        <button class="eliminar" (click)="eliminarTurno(turno.id)">Eliminar</button>
       </td>
     </tr>
   </tbody>
@@ -36,51 +36,112 @@
 <hr />
 
 <h3>Crear Turno</h3>
+
 <form (ngSubmit)="crearTurno()" #formTurno="ngForm">
   <label>
     Fecha:
-    <input type="date" [(ngModel)]="nuevoTurno.fecha" name="fecha" required />
-  </label><br />
+    <input
+      type="date"
+      [(ngModel)]="nuevoTurno.fecha"
+      name="fecha"
+      required
+      max="2050-12-31"
+    />
+  </label>
+  <br />
   <label>
     Hora:
-    <input type="time" [(ngModel)]="nuevoTurno.hora" name="hora" required />
-  </label><br />
+    <input
+      type="time"
+      [(ngModel)]="nuevoTurno.hora"
+      name="hora"
+      required
+    />
+  </label>
+  <br />
   <label>
     Razón:
-    <input type="text" [(ngModel)]="nuevoTurno.razon" name="razon" required />
-  </label><br />
+    <input
+      type="text"
+      [(ngModel)]="nuevoTurno.razon"
+      name="razon"
+      required
+    />
+  </label>
+  <br />
   <label>
     Paciente:
-    <select [(ngModel)]="nuevoTurno.pacienteId" name="pacienteId" required>
-      <option [ngValue]="null" disabled>-- Seleccionar paciente --</option>
-      <option *ngFor="let paciente of pacientes" [ngValue]="paciente.id">
+    <select
+      [(ngModel)]="nuevoTurno.pacienteId"
+      name="pacienteId"
+      required
+    >
+      <option [ngValue]="null" disabled selected>
+        -- Seleccionar paciente --
+      </option>
+      <option
+        *ngFor="let paciente of pacientes"
+        [ngValue]="paciente.id"
+      >
         {{ paciente.nombre }}
       </option>
     </select>
-  </label><br />
+  </label>
+  <br />
   <button type="submit">Crear Turno</button>
 </form>
 
 <hr />
 
 <h3>Editar Turno</h3>
+
 <form *ngIf="turnoEditando" (ngSubmit)="guardarEdicion()" #formEdit="ngForm">
   <label>
     Fecha:
-    <input type="date" [(ngModel)]="turnoEditando.fecha" name="editFecha" required />
-  </label><br />
+    <input
+      type="date"
+      [(ngModel)]="turnoEditando.fecha"
+      name="editFecha"
+      disabled
+    />
+  </label>
+  <br />
   <label>
     Hora:
-    <input type="time" [(ngModel)]="turnoEditando.hora" name="editHora" required />
-  </label><br />
+    <input
+      type="time"
+      [(ngModel)]="turnoEditando.hora"
+      name="editHora"
+      required
+    />
+  </label>
+  <br />
   <label>
     Razón:
-    <input type="text" [(ngModel)]="turnoEditando.razon" name="editRazon" required />
-  </label><br />
+    <input
+      type="text"
+      [(ngModel)]="turnoEditando.razon"
+      name="editRazon"
+      required
+    />
+  </label>
+  <br />
   <label>
     Paciente:
-    <input [value]="turnoEditando.paciente?.nombre" disabled />
-  </label><br />
+    <select
+      [(ngModel)]="turnoEditando.paciente.id"
+      name="editPacienteId"
+      disabled
+    >
+      <option
+        *ngFor="let paciente of pacientes"
+        [ngValue]="paciente.id"
+      >
+        {{ paciente.nombre }}
+      </option>
+    </select>
+  </label>
+  <br />
   <button type="submit">Guardar Cambios</button>
   <button type="button" (click)="cancelarEdicion()">Cancelar</button>
 </form>

@@ -1,21 +1,26 @@
-/* Estilos básicos para que el navbar se vea presentable.
-   Le damos color de fondo, un poco de padding y alineamos los enlaces. */
-
 nav {
-  background-color: #1976d2; /* azul similar a Angular Material */
-  padding: 1rem;
+  background-color: #2a2a3d;
+  padding: 12px 20px;
   display: flex;
-  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #444;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
-/* Estilo para los enlaces del navbar */
 nav a {
-  color: white;
+  color: #c9b4ff;
   text-decoration: none;
   font-weight: bold;
+  margin-right: 16px;
+  transition: color 0.3s ease;
 }
 
-/* Cuando un enlace está activo (es la vista actual), lo marcamos distinto */
-nav a.active {
-  text-decoration: underline;
+nav a:hover {
+  color: #ffffff;
+}
+
+nav .nav-links {
+  display: flex;
+  gap: 12px;
 }

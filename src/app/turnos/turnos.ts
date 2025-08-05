@@ -1,3 +1,5 @@
+// turnos.ts actualizado con validaciones y formatos correctos en edición
+
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -36,29 +38,43 @@ export class Turnos {
 
   cargarTurnos(): void {
     this.http.get<Turno[]>('http://localhost:3000/turnos').subscribe({
-      next: (data) => this.turnos = data,
+      next: (data) => {
+        this.turnos = data;
+      },
       error: (err) => console.error('Error al cargar turnos:', err)
     });
   }
 
   cargarPacientes(): void {
     this.http.get<Paciente[]>('http://localhost:3000/pacientes').subscribe({
-      next: (data) => this.pacientes = data,
+      next: (data) => {
+        this.pacientes = data;
+      },
       error: (err) => console.error('Error al cargar pacientes:', err)
     });
   }
 
   get turnosFiltrados(): Turno[] {
     if (!this.filtroFecha) return this.turnos;
-    return this.turnos.filter(t => t.fecha === this.filtroFecha);
+    return this.turnos.filter(t => {
+      const turnoFecha = new Date(t.fecha).toISOString().split('T')[0];
+      const filtro = new Date(this.filtroFecha).toISOString().split('T')[0];
+      return turnoFecha === filtro;
+    });
   }
 
   crearTurno(): void {
     const hoy = new Date();
-    const fechaHora = new Date(`${this.nuevoTurno.fecha}T${this.nuevoTurno.hora}`);
 
-    if (fechaHora < hoy) {
-      alert('⚠️ La fecha y hora del turno no pueden ser en el pasado.');
+    if (!this.nuevoTurno.fecha || !this.nuevoTurno.hora || !this.nuevoTurno.razon || !this.nuevoTurno.pacienteId) {
+      alert('⚠️ Completá todos los campos.');
+      return;
+    }
+
+    const fechaHora = new Date(`${this.nuevoTurno.fecha}T${this.nuevoTurno.hora}`);
+    const año = fechaHora.getFullYear();
+    if (fechaHora < hoy || año > 2050) {
+      alert('⚠️ Fecha no válida.');
       return;
     }
 
@@ -86,13 +102,19 @@ export class Turnos {
   }
 
   guardarEdicion(): void {
-    if (!this.turnoEditando) return;
+    if (!this.turnoEditando || !this.turnoEditando.hora || !this.turnoEditando.razon) {
+      alert('⚠️ Completá todos los campos.');
+      return;
+    }
+
+    const [anio, mes, dia] = this.turnoEditando.fecha.split('-').map(Number);
+    const [hora, minuto] = this.turnoEditando.hora.split(':').map(Number);
+    const fechaHora = new Date(anio, mes - 1, dia, hora, minuto);
 
     const hoy = new Date();
-    const fechaHora = new Date(`${this.turnoEditando.fecha}T${this.turnoEditando.hora}`);
-
-    if (fechaHora < hoy) {
-      alert('⚠️ La fecha y hora del turno no pueden ser en el pasado.');
+    const año = fechaHora.getFullYear();
+    if (fechaHora < hoy || año > 2050) {
+      alert('⚠️ Fecha y hora no válidas. No podés poner un turno en el pasado ni en un año absurdo.');
       return;
     }
 
@@ -120,13 +142,19 @@ export class Turnos {
     if (!confirm('¿Seguro que querés eliminar este turno?')) return;
 
     this.http.delete<void>(`http://localhost:3000/turnos/${id}`).subscribe({
-      next: () => this.turnos = this.turnos.filter(t => t.id !== id),
+      next: () => {
+        this.turnos = this.turnos.filter(t => t.id !== id);
+      },
       error: (err) => console.error('Error al eliminar turno:', err)
     });
   }
 
   getFechaFormateada(fecha: string): string {
-    const [year, month, day] = fecha.split('T')[0].split('-');
-    return `${day}/${month}/${year}`;
+    const fechaObj = new Date(fecha);
+    fechaObj.setMinutes(fechaObj.getMinutes() + fechaObj.getTimezoneOffset());
+    const dia = fechaObj.getDate().toString().padStart(2, '0');
+    const mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
+    const año = fechaObj.getFullYear();
+    return `${dia}/${mes}/${año}`;
   }
 }
