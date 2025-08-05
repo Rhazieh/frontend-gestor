@@ -1,5 +1,3 @@
-<!-- turnos.html -->
-
 <!-- Filtro por fecha -->
 <label>
   Filtrar por fecha:
@@ -23,7 +21,7 @@
   <tbody>
     <tr *ngFor="let turno of turnosFiltrados">
       <td>{{ turno.id }}</td>
-      <td>{{ turno.fecha | date:'yyyy-MM-dd' }}</td>
+      <td>{{ getFechaFormateada(turno.fecha) }}</td>
       <td>{{ turno.hora }}</td>
       <td>{{ turno.razon }}</td>
       <td>{{ turno.paciente?.nombre || 'Sin asignar' }}</td>
@@ -38,23 +36,19 @@
 <hr />
 
 <h3>Crear Turno</h3>
-
 <form (ngSubmit)="crearTurno()" #formTurno="ngForm">
   <label>
     Fecha:
     <input type="date" [(ngModel)]="nuevoTurno.fecha" name="fecha" required />
-  </label>
-  <br />
+  </label><br />
   <label>
     Hora:
     <input type="time" [(ngModel)]="nuevoTurno.hora" name="hora" required />
-  </label>
-  <br />
+  </label><br />
   <label>
     Razón:
     <input type="text" [(ngModel)]="nuevoTurno.razon" name="razon" required />
-  </label>
-  <br />
+  </label><br />
   <label>
     Paciente:
     <select [(ngModel)]="nuevoTurno.pacienteId" name="pacienteId" required>
@@ -63,40 +57,30 @@
         {{ paciente.nombre }}
       </option>
     </select>
-  </label>
-  <br />
+  </label><br />
   <button type="submit">Crear Turno</button>
 </form>
 
 <hr />
 
 <h3>Editar Turno</h3>
-
 <form *ngIf="turnoEditando" (ngSubmit)="guardarEdicion()" #formEdit="ngForm">
   <label>
     Fecha:
     <input type="date" [(ngModel)]="turnoEditando.fecha" name="editFecha" required />
-  </label>
-  <br />
+  </label><br />
   <label>
     Hora:
     <input type="time" [(ngModel)]="turnoEditando.hora" name="editHora" required />
-  </label>
-  <br />
+  </label><br />
   <label>
     Razón:
     <input type="text" [(ngModel)]="turnoEditando.razon" name="editRazon" required />
-  </label>
-  <br />
+  </label><br />
   <label>
     Paciente:
-    <select [(ngModel)]="turnoEditando.paciente.id" name="editPacienteId" required>
-      <option *ngFor="let paciente of pacientes" [ngValue]="paciente.id">
-        {{ paciente.nombre }}
-      </option>
-    </select>
-  </label>
-  <br />
+    <input [value]="turnoEditando.paciente?.nombre" disabled />
+  </label><br />
   <button type="submit">Guardar Cambios</button>
   <button type="button" (click)="cancelarEdicion()">Cancelar</button>
 </form>

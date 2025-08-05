@@ -1,6 +1,3 @@
-// Este componente maneja todo lo relacionado con los turnos:
-// muestra, crea, edita y elimina turnos.
-
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -37,46 +34,30 @@ export class Turnos {
     this.cargarPacientes();
   }
 
-  // Cargar turnos desde el backend
   cargarTurnos(): void {
     this.http.get<Turno[]>('http://localhost:3000/turnos').subscribe({
-      next: (data) => {
-        this.turnos = data;
-        console.log('Turnos cargados:', data);
-      },
+      next: (data) => this.turnos = data,
       error: (err) => console.error('Error al cargar turnos:', err)
     });
   }
 
-  // Cargar pacientes desde el backend
   cargarPacientes(): void {
     this.http.get<Paciente[]>('http://localhost:3000/pacientes').subscribe({
-      next: (data) => {
-        this.pacientes = data;
-        console.log('Pacientes cargados:', data);
-      },
+      next: (data) => this.pacientes = data,
       error: (err) => console.error('Error al cargar pacientes:', err)
     });
   }
 
-  // Filtro de turnos por fecha
   get turnosFiltrados(): Turno[] {
     if (!this.filtroFecha) return this.turnos;
-
-    return this.turnos.filter(t => {
-      const fechaTurno = new Date(t.fecha).toISOString().split('T')[0];
-      return fechaTurno === this.filtroFecha;
-    });
+    return this.turnos.filter(t => t.fecha === this.filtroFecha);
   }
 
-  // Crear nuevo turno (corregido)
   crearTurno(): void {
     const hoy = new Date();
-    const [year, month, day] = this.nuevoTurno.fecha.split('-').map(Number);
-    const [hour, minute] = this.nuevoTurno.hora.split(':').map(Number);
-    const fechaHoraTurno = new Date(year, month - 1, day, hour, minute);
+    const fechaHora = new Date(`${this.nuevoTurno.fecha}T${this.nuevoTurno.hora}`);
 
-    if (fechaHoraTurno < hoy) {
+    if (fechaHora < hoy) {
       alert('⚠️ La fecha y hora del turno no pueden ser en el pasado.');
       return;
     }
@@ -85,7 +66,7 @@ export class Turnos {
       fecha: this.nuevoTurno.fecha,
       hora: this.nuevoTurno.hora,
       razon: this.nuevoTurno.razon,
-      pacienteId: this.nuevoTurno.pacienteId  // ✅ corregido acá
+      pacienteId: this.nuevoTurno.pacienteId
     };
 
     this.http.post<Turno>('http://localhost:3000/turnos', turnoAEnviar).subscribe({
@@ -97,7 +78,6 @@ export class Turnos {
     });
   }
 
-  // Seleccionar turno para editar (optimizado y más claro)
   editarTurno(turno: Turno): void {
     this.turnoEditando = {
       ...turno,
@@ -105,42 +85,48 @@ export class Turnos {
     };
   }
 
-  // Guardar cambios de edición (corregido)
   guardarEdicion(): void {
     if (!this.turnoEditando) return;
+
+    const hoy = new Date();
+    const fechaHora = new Date(`${this.turnoEditando.fecha}T${this.turnoEditando.hora}`);
+
+    if (fechaHora < hoy) {
+      alert('⚠️ La fecha y hora del turno no pueden ser en el pasado.');
+      return;
+    }
 
     const turnoActualizado = {
       fecha: this.turnoEditando.fecha,
       hora: this.turnoEditando.hora,
       razon: this.turnoEditando.razon,
-      pacienteId: this.turnoEditando.paciente.id // ✅ corregido acá
+      pacienteId: this.turnoEditando.paciente.id
     };
 
     this.http.patch<Turno>(`http://localhost:3000/turnos/${this.turnoEditando.id}`, turnoActualizado).subscribe({
       next: () => {
-        this.cargarTurnos(); // Recargar turnos para sincronizar cambios correctamente
+        this.cargarTurnos();
         this.turnoEditando = null;
-        console.log('Turno actualizado exitosamente.');
       },
       error: (err) => console.error('Error al actualizar turno:', err)
     });
   }
 
-  // Cancelar edición
   cancelarEdicion(): void {
     this.turnoEditando = null;
   }
 
-  // Eliminar turno
   eliminarTurno(id: number): void {
     if (!confirm('¿Seguro que querés eliminar este turno?')) return;
 
     this.http.delete<void>(`http://localhost:3000/turnos/${id}`).subscribe({
-      next: () => {
-        this.turnos = this.turnos.filter(t => t.id !== id);
-        console.log(`Turno con ID ${id} eliminado.`);
-      },
+      next: () => this.turnos = this.turnos.filter(t => t.id !== id),
       error: (err) => console.error('Error al eliminar turno:', err)
     });
+  }
+
+  getFechaFormateada(fecha: string): string {
+    const [year, month, day] = fecha.split('T')[0].split('-');
+    return `${day}/${month}/${year}`;
   }
 }
