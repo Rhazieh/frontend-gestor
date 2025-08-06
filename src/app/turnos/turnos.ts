@@ -42,7 +42,7 @@ export class Turnos {
   }
 
   cargarTurnos(): void {
-    this.http.get<Turno[]>('http://localhost:3000/turnos').subscribe({
+    this.http.get<Turno[]>('https://backend-gestor-zfez.onrender.com/turnos').subscribe({
       next: (data) => {
         this.turnos = data;
       },
@@ -51,7 +51,7 @@ export class Turnos {
   }
 
   cargarPacientes(): void {
-    this.http.get<Paciente[]>('http://localhost:3000/pacientes').subscribe({
+    this.http.get<Paciente[]>('https://backend-gestor-zfez.onrender.com/pacientes').subscribe({
       next: (data) => {
         this.pacientes = data;
       },
@@ -75,7 +75,7 @@ export class Turnos {
 
     const turnoAEnviar = { ...this.nuevoTurno };
 
-    this.http.post<Turno>('http://localhost:3000/turnos', turnoAEnviar).subscribe({
+    this.http.post<Turno>('https://backend-gestor-zfez.onrender.com/turnos', turnoAEnviar).subscribe({
       next: () => {
         this.cargarTurnos();
         this.nuevoTurno = { fecha: '', hora: '', razon: '', pacienteId: null };
@@ -138,7 +138,7 @@ export class Turnos {
       pacienteId: this.turnoEditando!.paciente.id
     };
 
-    this.http.patch<Turno>(`http://localhost:3000/turnos/${this.turnoEditando!.id}`, turnoActualizado).subscribe({
+    this.http.patch<Turno>(`https://backend-gestor-zfez.onrender.com/turnos/${this.turnoEditando!.id}`, turnoActualizado).subscribe({
       next: () => {
         this.cargarTurnos();
         this.turnoEditando = null;
@@ -182,7 +182,7 @@ export class Turnos {
   eliminarTurno(id: number): void {
     if (!confirm('¿Seguro que querés eliminar este turno?')) return;
 
-    this.http.delete<void>(`http://localhost:3000/turnos/${id}`).subscribe({
+    this.http.delete<void>(`https://backend-gestor-zfez.onrender.com/turnos/${id}`).subscribe({
       next: () => {
         this.turnos = this.turnos.filter(t => t.id !== id);
       },

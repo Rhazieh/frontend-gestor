@@ -28,7 +28,7 @@ export class Pacientes {
   }
 
   cargarPacientes(): void {
-    this.http.get<Paciente[]>('http://localhost:3000/pacientes').subscribe({
+    this.http.get<Paciente[]>('https://backend-gestor-zfez.onrender.com/pacientes').subscribe({
       next: (data) => (this.pacientes = data),
       error: (err) => console.error('Error al cargar pacientes:', err)
     });
@@ -39,7 +39,7 @@ export class Pacientes {
     this.errores = this.validarCampos(this.nuevoPaciente);
     if (Object.keys(this.errores).length > 0) return;
 
-    this.http.post<Paciente>('http://localhost:3000/pacientes', this.nuevoPaciente).subscribe({
+    this.http.post<Paciente>('https://backend-gestor-zfez.onrender.com/pacientes', this.nuevoPaciente).subscribe({
       next: (pacienteCreado) => {
         this.pacientes.push(pacienteCreado);
         this.nuevoPaciente = { nombre: '', email: '', telefono: '' };
@@ -51,7 +51,7 @@ export class Pacientes {
   }
 
   eliminarPaciente(id: number): void {
-    this.http.get<Turno[]>('http://localhost:3000/turnos').subscribe({
+    this.http.get<Turno[]>('https://backend-gestor-zfez.onrender.com/turnos').subscribe({
       next: (turnos) => {
         const tieneTurnos = turnos.some(t => t.paciente?.id === id);
         const mensaje = tieneTurnos
@@ -59,7 +59,7 @@ export class Pacientes {
           : '¿Estás seguro de que querés eliminar este paciente?';
 
         if (confirm(mensaje)) {
-          this.http.delete<void>(`http://localhost:3000/pacientes/${id}`).subscribe({
+          this.http.delete<void>(`https://backend-gestor-zfez.onrender.com/pacientes/${id}`).subscribe({
             next: () => (this.pacientes = this.pacientes.filter(p => p.id !== id)),
             error: (err) => console.error('Error al eliminar paciente:', err)
           });
@@ -80,7 +80,7 @@ export class Pacientes {
     if (Object.keys(this.erroresEdicion).length > 0) return;
 
     this.http.patch<Paciente>(
-      `http://localhost:3000/pacientes/${this.pacienteEditando.id}`,
+      `https://backend-gestor-zfez.onrender.com/pacientes/${this.pacienteEditando.id}`,
       this.pacienteEditando
     ).subscribe({
       next: (pacienteActualizado) => {

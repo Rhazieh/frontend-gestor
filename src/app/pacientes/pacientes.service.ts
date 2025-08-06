@@ -9,7 +9,7 @@ import { Paciente } from '../models/paciente';
   providedIn: 'root'
 })
 export class PacientesService {
-  private apiUrl = 'http://localhost:3000/pacientes';
+  private apiUrl = 'https://backend-gestor-zfez.onrender.com/pacientes';
 
   constructor(private http: HttpClient) {}
 
