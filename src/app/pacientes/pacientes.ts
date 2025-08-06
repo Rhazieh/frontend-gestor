@@ -19,6 +19,10 @@ export class Pacientes {
   nuevoPaciente: Partial<Paciente> = { nombre: '', email: '', telefono: '' };
   pacienteEditando: Paciente | null = null;
 
+  errores: any = {};
+  erroresEdicion: any = {};
+  intentoEnviar = false;
+
   constructor() {
     this.cargarPacientes();
   }
@@ -31,13 +35,16 @@ export class Pacientes {
   }
 
   crearPaciente(): void {
-    console.log('Nuevo paciente:', this.nuevoPaciente);
-    if (!this.validarCampos(this.nuevoPaciente)) return;
+    this.intentoEnviar = true;
+    this.errores = this.validarCampos(this.nuevoPaciente);
+    if (Object.keys(this.errores).length > 0) return;
 
     this.http.post<Paciente>('http://localhost:3000/pacientes', this.nuevoPaciente).subscribe({
       next: (pacienteCreado) => {
         this.pacientes.push(pacienteCreado);
         this.nuevoPaciente = { nombre: '', email: '', telefono: '' };
+        this.errores = {};
+        this.intentoEnviar = false;
       },
       error: (err) => console.error('Error al crear paciente:', err)
     });
@@ -64,11 +71,13 @@ export class Pacientes {
 
   editarPaciente(paciente: Paciente): void {
     this.pacienteEditando = { ...paciente };
+    this.erroresEdicion = {};
   }
 
   actualizarPaciente(): void {
     if (!this.pacienteEditando) return;
-    if (!this.validarCampos(this.pacienteEditando)) return;
+    this.erroresEdicion = this.validarCampos(this.pacienteEditando);
+    if (Object.keys(this.erroresEdicion).length > 0) return;
 
     this.http.patch<Paciente>(
       `http://localhost:3000/pacientes/${this.pacienteEditando.id}`,
@@ -85,30 +94,31 @@ export class Pacientes {
 
   cancelarEdicion(): void {
     this.pacienteEditando = null;
+    this.erroresEdicion = {};
   }
 
-  private validarCampos(paciente: Partial<Paciente>): boolean {
-    if (!paciente.nombre?.trim() || !paciente.email?.trim() || !paciente.telefono?.trim()) {
-      alert('⚠️ Todos los campos son obligatorios.');
-      return false;
+  private validarCampos(paciente: Partial<Paciente>): any {
+    const errores: any = {};
+
+    if (!paciente.nombre?.trim()) {
+      errores.nombre = 'El nombre es obligatorio.';
+    } else if (!this.validarNombre(paciente.nombre)) {
+      errores.nombre = 'Debe tener de 2 a 4 palabras, mínimo 3 letras cada una.';
     }
 
-    if (!this.validarNombre(paciente.nombre)) {
-      alert('⚠️ El nombre debe tener entre 2 y 4 palabras, mínimo 3 letras cada una.');
-      return false;
+    if (!paciente.email?.trim()) {
+      errores.email = 'El email es obligatorio.';
+    } else if (!this.validarEmail(paciente.email)) {
+      errores.email = 'Formato de email inválido.';
     }
 
-    if (!this.validarEmail(paciente.email)) {
-      alert('⚠️ Ingresá un email válido con letras en nombre y dominio.');
-      return false;
+    if (!paciente.telefono?.trim()) {
+      errores.telefono = 'El teléfono es obligatorio.';
+    } else if (!this.validarTelefono(paciente.telefono)) {
+      errores.telefono = 'Debe tener entre 8 y 15 dígitos.';
     }
 
-    if (!this.validarTelefono(paciente.telefono)) {
-      alert('⚠️ El teléfono debe tener entre 8 y 15 dígitos numéricos.');
-      return false;
-    }
-
-    return true;
+    return errores;
   }
 
   private validarEmail(email: string): boolean {

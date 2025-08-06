@@ -1,7 +1,16 @@
-<!-- Filtro por fecha -->
+<!-- Filtro por fecha y paciente -->
 <label>
   Filtrar por fecha:
   <input type="date" [(ngModel)]="filtroFecha" name="filtroFecha" />
+</label>
+<label>
+  Filtrar por paciente:
+  <select [(ngModel)]="filtroPacienteId" name="filtroPacienteId">
+    <option [ngValue]="null">-- Todos --</option>
+    <option *ngFor="let paciente of pacientes" [ngValue]="paciente.id">
+      {{ paciente.nombre }} (ID: {{ paciente.id }})
+    </option>
+  </select>
 </label>
 <br />
 
@@ -37,7 +46,7 @@
 
 <h3>Crear Turno</h3>
 
-<form (ngSubmit)="crearTurno()" #formTurno="ngForm">
+<form (ngSubmit)="crearTurno()" #formTurno="ngForm" novalidate>
   <label>
     Fecha:
     <input
@@ -47,6 +56,7 @@
       required
       max="2050-12-31"
     />
+    <small class="error" *ngIf="errores.fecha && intentoEnviar">{{ errores.fecha }}</small>
   </label>
   <br />
   <label>
@@ -57,6 +67,7 @@
       name="hora"
       required
     />
+    <small class="error" *ngIf="errores.hora && intentoEnviar">{{ errores.hora }}</small>
   </label>
   <br />
   <label>
@@ -67,6 +78,7 @@
       name="razon"
       required
     />
+    <small class="error" *ngIf="errores.razon && intentoEnviar">{{ errores.razon }}</small>
   </label>
   <br />
   <label>
@@ -86,6 +98,7 @@
         {{ paciente.nombre }}
       </option>
     </select>
+    <small class="error" *ngIf="errores.pacienteId && intentoEnviar">{{ errores.pacienteId }}</small>
   </label>
   <br />
   <button type="submit">Crear Turno</button>
@@ -95,7 +108,7 @@
 
 <h3>Editar Turno</h3>
 
-<form *ngIf="turnoEditando" (ngSubmit)="guardarEdicion()" #formEdit="ngForm">
+<form *ngIf="turnoEditando" (ngSubmit)="guardarEdicion()" #formEdit="ngForm" novalidate>
   <label>
     Fecha:
     <input
@@ -104,6 +117,7 @@
       name="editFecha"
       disabled
     />
+    <small class="error" *ngIf="erroresEdicion.fecha">{{ erroresEdicion.fecha }}</small>
   </label>
   <br />
   <label>
@@ -114,6 +128,7 @@
       name="editHora"
       required
     />
+    <small class="error" *ngIf="erroresEdicion.hora">{{ erroresEdicion.hora }}</small>
   </label>
   <br />
   <label>
@@ -124,6 +139,7 @@
       name="editRazon"
       required
     />
+    <small class="error" *ngIf="erroresEdicion.razon">{{ erroresEdicion.razon }}</small>
   </label>
   <br />
   <label>

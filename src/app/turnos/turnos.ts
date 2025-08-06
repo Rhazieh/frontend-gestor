@@ -1,4 +1,4 @@
-// turnos.ts actualizado con validaciones y formatos correctos en edición
+// turnos.ts mejorado con validaciones en pantalla
 
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -21,6 +21,7 @@ export class Turnos {
   pacientes: Paciente[] = [];
 
   filtroFecha: string = '';
+  filtroPacienteId: number | null = null;
 
   nuevoTurno = {
     fecha: '',
@@ -30,6 +31,10 @@ export class Turnos {
   };
 
   turnoEditando: Turno | null = null;
+
+  errores: any = {};
+  erroresEdicion: any = {};
+  intentoEnviar = false;
 
   constructor() {
     this.cargarTurnos();
@@ -55,43 +60,62 @@ export class Turnos {
   }
 
   get turnosFiltrados(): Turno[] {
-    if (!this.filtroFecha) return this.turnos;
     return this.turnos.filter(t => {
-      const turnoFecha = new Date(t.fecha).toISOString().split('T')[0];
-      const filtro = new Date(this.filtroFecha).toISOString().split('T')[0];
-      return turnoFecha === filtro;
+      const coincideFecha = !this.filtroFecha || new Date(t.fecha).toISOString().split('T')[0] === new Date(this.filtroFecha).toISOString().split('T')[0];
+      const coincidePaciente = !this.filtroPacienteId || t.paciente?.id === this.filtroPacienteId;
+      return coincideFecha && coincidePaciente;
     });
   }
 
   crearTurno(): void {
-    const hoy = new Date();
+    this.intentoEnviar = true;
+    this.errores = {};
 
-    if (!this.nuevoTurno.fecha || !this.nuevoTurno.hora || !this.nuevoTurno.razon || !this.nuevoTurno.pacienteId) {
-      alert('⚠️ Completá todos los campos.');
-      return;
-    }
+    if (!this.validarNuevoTurno()) return;
 
-    const fechaHora = new Date(`${this.nuevoTurno.fecha}T${this.nuevoTurno.hora}`);
-    const año = fechaHora.getFullYear();
-    if (fechaHora < hoy || año > 2050) {
-      alert('⚠️ Fecha no válida.');
-      return;
-    }
-
-    const turnoAEnviar = {
-      fecha: this.nuevoTurno.fecha,
-      hora: this.nuevoTurno.hora,
-      razon: this.nuevoTurno.razon,
-      pacienteId: this.nuevoTurno.pacienteId
-    };
+    const turnoAEnviar = { ...this.nuevoTurno };
 
     this.http.post<Turno>('http://localhost:3000/turnos', turnoAEnviar).subscribe({
       next: () => {
         this.cargarTurnos();
         this.nuevoTurno = { fecha: '', hora: '', razon: '', pacienteId: null };
+        this.intentoEnviar = false;
       },
       error: (err) => console.error('Error al crear turno:', err)
     });
+  }
+
+  validarNuevoTurno(): boolean {
+    const { fecha, hora, razon, pacienteId } = this.nuevoTurno;
+    let valido = true;
+    const hoy = new Date();
+    const fechaHora = new Date(`${fecha}T${hora}`);
+    const año = fechaHora.getFullYear();
+
+    if (!fecha) {
+      this.errores.fecha = 'La fecha es obligatoria';
+      valido = false;
+    } else if (fechaHora < hoy || año > 2050) {
+      this.errores.fecha = 'La fecha debe ser posterior a hoy y no superar el año 2050';
+      valido = false;
+    }
+
+    if (!hora) {
+      this.errores.hora = 'La hora es obligatoria';
+      valido = false;
+    }
+
+    if (!razon?.trim()) {
+      this.errores.razon = 'La razón es obligatoria';
+      valido = false;
+    }
+
+    if (!pacienteId) {
+      this.errores.pacienteId = 'Debés seleccionar un paciente';
+      valido = false;
+    }
+
+    return valido;
   }
 
   editarTurno(turno: Turno): void {
@@ -99,39 +123,56 @@ export class Turnos {
       ...turno,
       paciente: { ...turno.paciente }
     };
+    this.erroresEdicion = {};
   }
 
   guardarEdicion(): void {
-    if (!this.turnoEditando || !this.turnoEditando.hora || !this.turnoEditando.razon) {
-      alert('⚠️ Completá todos los campos.');
-      return;
-    }
+    this.erroresEdicion = {};
 
-    const [anio, mes, dia] = this.turnoEditando.fecha.split('-').map(Number);
-    const [hora, minuto] = this.turnoEditando.hora.split(':').map(Number);
-    const fechaHora = new Date(anio, mes - 1, dia, hora, minuto);
-
-    const hoy = new Date();
-    const año = fechaHora.getFullYear();
-    if (fechaHora < hoy || año > 2050) {
-      alert('⚠️ Fecha y hora no válidas. No podés poner un turno en el pasado ni en un año absurdo.');
-      return;
-    }
+    if (!this.validarTurnoEditando()) return;
 
     const turnoActualizado = {
-      fecha: this.turnoEditando.fecha,
-      hora: this.turnoEditando.hora,
-      razon: this.turnoEditando.razon,
-      pacienteId: this.turnoEditando.paciente.id
+      fecha: this.turnoEditando!.fecha,
+      hora: this.turnoEditando!.hora,
+      razon: this.turnoEditando!.razon,
+      pacienteId: this.turnoEditando!.paciente.id
     };
 
-    this.http.patch<Turno>(`http://localhost:3000/turnos/${this.turnoEditando.id}`, turnoActualizado).subscribe({
+    this.http.patch<Turno>(`http://localhost:3000/turnos/${this.turnoEditando!.id}`, turnoActualizado).subscribe({
       next: () => {
         this.cargarTurnos();
         this.turnoEditando = null;
       },
       error: (err) => console.error('Error al actualizar turno:', err)
     });
+  }
+
+  validarTurnoEditando(): boolean {
+    if (!this.turnoEditando) return false;
+
+    const { fecha, hora, razon } = this.turnoEditando;
+    let valido = true;
+    const [anio, mes, dia] = fecha.split('-').map(Number);
+    const [h, m] = hora.split(':').map(Number);
+    const fechaHora = new Date(anio, mes - 1, dia, h, m);
+    const hoy = new Date();
+
+    if (!hora) {
+      this.erroresEdicion.hora = 'La hora es obligatoria';
+      valido = false;
+    }
+
+    if (!razon?.trim()) {
+      this.erroresEdicion.razon = 'La razón es obligatoria';
+      valido = false;
+    }
+
+    if (fechaHora < hoy || anio > 2050) {
+      this.erroresEdicion.fecha = 'Fecha inválida';
+      valido = false;
+    }
+
+    return valido;
   }
 
   cancelarEdicion(): void {

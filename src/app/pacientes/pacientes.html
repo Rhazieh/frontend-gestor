@@ -29,50 +29,50 @@
 <hr />
 
 <h3>Crear Paciente</h3>
-<form (ngSubmit)="crearPaciente()" #formCrear="ngForm">
+<form (ngSubmit)="crearPaciente()" #formCrear="ngForm" novalidate>
   <label>
     Nombre y Apellido:
-    <input type="text" [(ngModel)]="nuevoPaciente.nombre" name="nombre" required maxlength="30"
-           pattern="^([A-Za-zÁÉÍÓÚáéíóúñÑ]{3,})( [A-Za-zÁÉÍÓÚáéíóúñÑ]{3,}){1,3}$" />
+    <input type="text" [(ngModel)]="nuevoPaciente.nombre" name="nombre" maxlength="30" />
+    <small class="error" *ngIf="errores.nombre && intentoEnviar">{{ errores.nombre }}</small>
   </label>
   <br />
   <label>
     Email:
-    <input type="email" [(ngModel)]="nuevoPaciente.email" name="email" required maxlength="30"
-           pattern="^[a-zA-Z0-9._%+-]{4,}@[a-zA-Z0-9-]*[a-zA-Z][a-zA-Z0-9-]*\.[a-zA-Z]{2,4}$" />
+    <input type="email" [(ngModel)]="nuevoPaciente.email" name="email" maxlength="30" />
+    <small class="error" *ngIf="errores.email && intentoEnviar">{{ errores.email }}</small>
   </label>
   <br />
   <label>
     Teléfono:
-    <input type="text" [(ngModel)]="nuevoPaciente.telefono" name="telefono" required maxlength="15"
-           pattern="^[0-9]{8,15}$" />
+    <input type="text" [(ngModel)]="nuevoPaciente.telefono" name="telefono" maxlength="15" />
+    <small class="error" *ngIf="errores.telefono && intentoEnviar">{{ errores.telefono }}</small>
   </label>
   <br />
-  <button type="submit" [disabled]="!formCrear.form.valid">Crear</button>
+  <button type="submit">Crear</button>
 </form>
 
 <hr />
 
 <h3>Editar Paciente</h3>
-<form *ngIf="pacienteEditando" (ngSubmit)="actualizarPaciente()" #formEdit="ngForm">
+<form *ngIf="pacienteEditando" (ngSubmit)="actualizarPaciente()" #formEdit="ngForm" novalidate>
   <label>
     Nombre y Apellido:
-    <input type="text" [(ngModel)]="pacienteEditando.nombre" name="editNombre" required maxlength="30"
-           pattern="^([A-Za-zÁÉÍÓÚáéíóúñÑ]{3,})( [A-Za-zÁÉÍÓÚáéíóúñÑ]{3,}){1,3}$" />
+    <input type="text" [(ngModel)]="pacienteEditando.nombre" name="editNombre" maxlength="30" />
+    <small class="error" *ngIf="erroresEdicion.nombre">{{ erroresEdicion.nombre }}</small>
   </label>
   <br />
   <label>
     Email:
-    <input type="email" [(ngModel)]="pacienteEditando.email" name="editEmail" required maxlength="30"
-           pattern="^[a-zA-Z0-9._%+-]{4,}@[a-zA-Z0-9-]*[a-zA-Z][a-zA-Z0-9-]*\.[a-zA-Z]{2,4}$" />
+    <input type="email" [(ngModel)]="pacienteEditando.email" name="editEmail" maxlength="30" />
+    <small class="error" *ngIf="erroresEdicion.email">{{ erroresEdicion.email }}</small>
   </label>
   <br />
   <label>
     Teléfono:
-    <input type="text" [(ngModel)]="pacienteEditando.telefono" name="editTelefono" required maxlength="15"
-           pattern="^[0-9]{8,15}$" />
+    <input type="text" [(ngModel)]="pacienteEditando.telefono" name="editTelefono" maxlength="15" />
+    <small class="error" *ngIf="erroresEdicion.telefono">{{ erroresEdicion.telefono }}</small>
   </label>
   <br />
-  <button type="submit" [disabled]="!formEdit.form.valid">Actualizar</button>
+  <button type="submit">Actualizar</button>
   <button type="button" (click)="cancelarEdicion()">Cancelar</button>
 </form>
