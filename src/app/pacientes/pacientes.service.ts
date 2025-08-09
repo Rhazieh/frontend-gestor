@@ -44,8 +44,9 @@ export class PacientesService {
   }
 
   actualizarPaciente(id: number, paciente: Partial<Paciente>): Observable<Paciente> {
-    return this.http.patch<Paciente>(`${this.apiUrl}/${id}`, paciente);
-  }
+  return this.http.put<Paciente>(`${this.apiUrl}/${id}`, paciente);
+}
+
 
   eliminarPaciente(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
