@@ -1,33 +1,41 @@
 // frontend-gestor/src/app/pacientes/pacientes.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, delay, retryWhen, scan, throwError } from 'rxjs';
+import {
+  Observable,
+  catchError,
+  delay,
+  retryWhen,
+  scan,
+  throwError,
+  MonoTypeOperatorFunction,
+} from 'rxjs';
 import { Paciente } from '../models/paciente';
 import { API_BASE } from '../config';
 
-// reintento simple para 503 de Render (cold start)
-function retry503(max = 3, waitMs = 1200) {
-  return retryWhen(errors =>
+// Reintento tipado para evitar TS2345
+function retry503<T>(max = 3, waitMs = 1200): MonoTypeOperatorFunction<T> {
+  return retryWhen((errors) =>
     errors.pipe(
-      scan((acc, err: any) => {
+      scan((acc: number, err: any) => {
         if (acc >= max || (err?.status && err.status !== 503)) throw err;
         return acc + 1;
       }, 0),
-      delay(waitMs)
-    )
+      delay(waitMs),
+    ),
   );
 }
 
 @Injectable({ providedIn: 'root' })
 export class PacientesService {
-  private apiUrl = `${API_BASE}/pacientes`; // o `${API_BASE}/patients` si migrás al alias
+  private apiUrl = `${API_BASE}/pacientes`; // o `${API_BASE}/patients`
 
   constructor(private http: HttpClient) {}
 
   getPacientes(): Observable<Paciente[]> {
     return this.http.get<Paciente[]>(this.apiUrl).pipe(
-      retry503(),
-      catchError(err => throwError(() => err))
+      retry503<Paciente[]>(),
+      catchError((err) => throwError(() => err)),
     );
   }
 

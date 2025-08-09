@@ -1,19 +1,27 @@
 // frontend-gestor/src/app/turnos/turnos.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, delay, retryWhen, scan, throwError } from 'rxjs';
+import {
+  Observable,
+  catchError,
+  delay,
+  retryWhen,
+  scan,
+  throwError,
+  MonoTypeOperatorFunction,
+} from 'rxjs';
 import { Turno } from '../models/turno';
 import { API_BASE } from '../config';
 
-function retry503(max = 3, waitMs = 1200) {
-  return retryWhen(errors =>
+function retry503<T>(max = 3, waitMs = 1200): MonoTypeOperatorFunction<T> {
+  return retryWhen((errors) =>
     errors.pipe(
-      scan((acc, err: any) => {
+      scan((acc: number, err: any) => {
         if (acc >= max || (err?.status && err.status !== 503)) throw err;
         return acc + 1;
       }, 0),
-      delay(waitMs)
-    )
+      delay(waitMs),
+    ),
   );
 }
 
@@ -25,8 +33,8 @@ export class TurnosService {
 
   getTurnos(): Observable<Turno[]> {
     return this.http.get<Turno[]>(this.apiUrl).pipe(
-      retry503(),
-      catchError(err => throwError(() => err))
+      retry503<Turno[]>(),
+      catchError((err) => throwError(() => err)),
     );
   }
 
