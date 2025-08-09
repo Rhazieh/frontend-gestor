@@ -1,4 +1,3 @@
-// src/app/turnos/turnos.ts
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -46,7 +45,13 @@ export class Turnos {
 
   cargarTurnos(): void {
     this.turnosSvc.getTurnos().subscribe({
-      next: (data) => (this.turnos = data),
+      next: (data) => {
+        // normalizo hora a "HH:MM" (si viniera "HH:MM:SS" del backend)
+        this.turnos = data.map(t => ({
+          ...t,
+          hora: t?.hora ? t.hora.slice(0, 5) : ''
+        }));
+      },
       error: (err) => console.error('Error al cargar turnos:', err)
     });
   }
@@ -60,9 +65,10 @@ export class Turnos {
 
   get turnosFiltrados(): Turno[] {
     return this.turnos.filter(t => {
+      // comparo por string YYYY-MM-DD para evitar timezone raros
       const coincideFecha =
         !this.filtroFecha ||
-        (t.fecha && new Date(t.fecha).toISOString().split('T')[0] === new Date(this.filtroFecha).toISOString().split('T')[0]);
+        (!!t.fecha && t.fecha.slice(0, 10) === this.filtroFecha);
 
       const coincidePaciente =
         !this.filtroPacienteId || t.paciente?.id === this.filtroPacienteId;
@@ -92,37 +98,36 @@ export class Turnos {
   validarNuevoTurno(): boolean {
     const { fecha, hora, razon, pacienteId } = this.nuevoTurno;
     let valido = true;
+    const errores: any = {};
 
-    if (!fecha) {
-      this.errores.fecha = 'La fecha es obligatoria';
-      valido = false;
-    }
-    if (fecha) {
-      const hoy = new Date(); hoy.setHours(0,0,0,0);
-      const f = new Date(fecha);
-      if (isNaN(f.getTime()) || f < hoy) {
-        this.errores.fecha = 'La fecha debe ser hoy o futura';
+    if (!fecha) { errores.fecha = 'La fecha es obligatoria'; valido = false; }
+    if (!hora)  { errores.hora  = 'La hora es obligatoria';  valido = false; }
+    if (!razon?.trim()) { errores.razon = 'La razón es obligatoria'; valido = false; }
+    if (!pacienteId) { errores.pacienteId = 'Debés seleccionar un paciente'; valido = false; }
+
+    // Validación fuerte: fecha+hora en local >= ahora
+    if (fecha && hora) {
+      const [y, m, d] = fecha.split('-').map(Number);
+      const [hh, mm]  = hora.split(':').map(Number);
+      const cuando = new Date(y, (m ?? 1) - 1, d ?? 1, hh ?? 0, mm ?? 0, 0, 0);
+      const ahora = new Date(); ahora.setSeconds(0, 0);
+      if (isNaN(cuando.getTime()) || cuando < ahora || (y ?? 0) > 2050) {
+        errores.fecha = 'La fecha y hora deben ser presentes o futuras';
         valido = false;
       }
     }
-    if (!hora) {
-      this.errores.hora = 'La hora es obligatoria';
-      valido = false;
-    }
-    if (!razon?.trim()) {
-      this.errores.razon = 'La razón es obligatoria';
-      valido = false;
-    }
-    if (!pacienteId) {
-      this.errores.pacienteId = 'Debés seleccionar un paciente';
-      valido = false;
-    }
 
+    this.errores = errores;
     return valido;
   }
 
   editarTurno(turno: Turno): void {
-    this.turnoEditando = { ...turno, paciente: { ...turno.paciente } };
+    // normalizo la hora para el <input type="time">
+    this.turnoEditando = {
+      ...turno,
+      hora: turno?.hora ? turno.hora.slice(0, 5) : '',
+      paciente: { ...turno.paciente }
+    };
     this.erroresEdicion = {};
   }
 
@@ -131,19 +136,31 @@ export class Turnos {
 
     this.erroresEdicion = {};
     const { fecha, hora, razon, paciente } = this.turnoEditando;
+    let valido = true;
 
-    if (!hora) this.erroresEdicion.hora = 'La hora es obligatoria';
-    if (!razon?.trim()) this.erroresEdicion.razon = 'La razón es obligatoria';
-    if (Object.keys(this.erroresEdicion).length > 0) return;
+    if (!hora) { this.erroresEdicion.hora = 'La hora es obligatoria'; valido = false; }
+    if (!razon?.trim()) { this.erroresEdicion.razon = 'La razón es obligatoria'; valido = false; }
+
+    // Chequeo fecha+hora en local
+    const [y, m, d] = (fecha ?? '').split('-').map(Number);
+    const [hh, mm]  = (hora ?? '').split(':').map(Number);
+    const cuando = new Date(y ?? 0, (m ?? 1) - 1, d ?? 1, hh ?? 0, mm ?? 0, 0, 0);
+    const ahora = new Date(); ahora.setSeconds(0, 0);
+    if (isNaN(cuando.getTime()) || cuando < ahora || (y ?? 0) > 2050) {
+      this.erroresEdicion.fecha = 'Fecha inválida';
+      valido = false;
+    }
+
+    if (!valido) return;
 
     const turnoActualizado = {
       fecha,
-      hora,
+      hora, // ya viene "HH:MM"
       razon,
       pacienteId: paciente?.id
     };
 
-    // Compatibilidad con backend actual (PATCH). Si preferís PUT, usá actualizarTurnoCompleto
+    // Compatibilidad con backend actual (PATCH)
     this.turnosSvc.actualizarTurnoParcial(this.turnoEditando.id, turnoActualizado).subscribe({
       next: () => {
         this.cargarTurnos();
@@ -168,12 +185,13 @@ export class Turnos {
 
   getFechaFormateada(fecha: string): string {
     if (!fecha) return '—';
-    const fechaObj = new Date(fecha);
-    // normalizo a local sin offset
-    fechaObj.setMinutes(fechaObj.getMinutes() + fechaObj.getTimezoneOffset());
-    const dia = fechaObj.getDate().toString().padStart(2, '0');
-    const mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
-    const año = fechaObj.getFullYear();
-    return `${dia}/${mes}/${año}`;
+    // Evito timezone: parseo el string "YYYY-MM-DD" directo
+    const soloFecha = fecha.split('T')[0] ?? fecha;
+    const [y, m, d] = soloFecha.split('-').map(Number);
+    if (!y || !m || !d) return soloFecha;
+    const dd = d.toString().padStart(2, '0');
+    const mm = m.toString().padStart(2, '0');
+    const yyyy = y.toString();
+    return `${dd}/${mm}/${yyyy}`;
   }
 }
