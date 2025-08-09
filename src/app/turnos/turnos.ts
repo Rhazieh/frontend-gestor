@@ -1,9 +1,11 @@
-// turnos.ts mejorado con validaciones en pantalla
-
+// src/app/turnos/turnos.ts
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+
+import { TurnosService } from './turnos.service';
+import { PacientesService } from '../pacientes/pacientes.service';
+
 import { Turno } from '../models/turno';
 import { Paciente } from '../models/paciente';
 
@@ -15,7 +17,8 @@ import { Paciente } from '../models/paciente';
   styleUrl: './turnos.css'
 })
 export class Turnos {
-  private http = inject(HttpClient);
+  private turnosSvc = inject(TurnosService);
+  private pacientesSvc = inject(PacientesService);
 
   turnos: Turno[] = [];
   pacientes: Paciente[] = [];
@@ -42,27 +45,28 @@ export class Turnos {
   }
 
   cargarTurnos(): void {
-    this.http.get<Turno[]>('https://backend-gestor-zfez.onrender.com/turnos').subscribe({
-      next: (data) => {
-        this.turnos = data;
-      },
+    this.turnosSvc.getTurnos().subscribe({
+      next: (data) => (this.turnos = data),
       error: (err) => console.error('Error al cargar turnos:', err)
     });
   }
 
   cargarPacientes(): void {
-    this.http.get<Paciente[]>('https://backend-gestor-zfez.onrender.com/pacientes').subscribe({
-      next: (data) => {
-        this.pacientes = data;
-      },
+    this.pacientesSvc.getPacientes().subscribe({
+      next: (data) => (this.pacientes = data),
       error: (err) => console.error('Error al cargar pacientes:', err)
     });
   }
 
   get turnosFiltrados(): Turno[] {
     return this.turnos.filter(t => {
-      const coincideFecha = !this.filtroFecha || new Date(t.fecha).toISOString().split('T')[0] === new Date(this.filtroFecha).toISOString().split('T')[0];
-      const coincidePaciente = !this.filtroPacienteId || t.paciente?.id === this.filtroPacienteId;
+      const coincideFecha =
+        !this.filtroFecha ||
+        (t.fecha && new Date(t.fecha).toISOString().split('T')[0] === new Date(this.filtroFecha).toISOString().split('T')[0]);
+
+      const coincidePaciente =
+        !this.filtroPacienteId || t.paciente?.id === this.filtroPacienteId;
+
       return coincideFecha && coincidePaciente;
     });
   }
@@ -75,7 +79,7 @@ export class Turnos {
 
     const turnoAEnviar = { ...this.nuevoTurno };
 
-    this.http.post<Turno>('https://backend-gestor-zfez.onrender.com/turnos', turnoAEnviar).subscribe({
+    this.turnosSvc.crearTurno(turnoAEnviar).subscribe({
       next: () => {
         this.cargarTurnos();
         this.nuevoTurno = { fecha: '', hora: '', razon: '', pacienteId: null };
@@ -88,28 +92,19 @@ export class Turnos {
   validarNuevoTurno(): boolean {
     const { fecha, hora, razon, pacienteId } = this.nuevoTurno;
     let valido = true;
-    const hoy = new Date();
-    const fechaHora = new Date(`${fecha}T${hora}`);
-    const año = fechaHora.getFullYear();
 
     if (!fecha) {
       this.errores.fecha = 'La fecha es obligatoria';
       valido = false;
-    } else if (fechaHora < hoy || año > 2050) {
-      this.errores.fecha = 'La fecha debe ser posterior a hoy y no superar el año 2050';
-      valido = false;
     }
-
     if (!hora) {
       this.errores.hora = 'La hora es obligatoria';
       valido = false;
     }
-
     if (!razon?.trim()) {
       this.errores.razon = 'La razón es obligatoria';
       valido = false;
     }
-
     if (!pacienteId) {
       this.errores.pacienteId = 'Debés seleccionar un paciente';
       valido = false;
@@ -119,60 +114,35 @@ export class Turnos {
   }
 
   editarTurno(turno: Turno): void {
-    this.turnoEditando = {
-      ...turno,
-      paciente: { ...turno.paciente }
-    };
+    this.turnoEditando = { ...turno, paciente: { ...turno.paciente } };
     this.erroresEdicion = {};
   }
 
   guardarEdicion(): void {
-    this.erroresEdicion = {};
+    if (!this.turnoEditando) return;
 
-    if (!this.validarTurnoEditando()) return;
+    this.erroresEdicion = {};
+    const { fecha, hora, razon, paciente } = this.turnoEditando;
+
+    if (!hora) this.erroresEdicion.hora = 'La hora es obligatoria';
+    if (!razon?.trim()) this.erroresEdicion.razon = 'La razón es obligatoria';
+    if (Object.keys(this.erroresEdicion).length > 0) return;
 
     const turnoActualizado = {
-      fecha: this.turnoEditando!.fecha,
-      hora: this.turnoEditando!.hora,
-      razon: this.turnoEditando!.razon,
-      pacienteId: this.turnoEditando!.paciente.id
+      fecha,
+      hora,
+      razon,
+      pacienteId: paciente?.id
     };
 
-    this.http.patch<Turno>(`https://backend-gestor-zfez.onrender.com/turnos/${this.turnoEditando!.id}`, turnoActualizado).subscribe({
+    // Compatibilidad con backend actual (PATCH). Si preferís PUT, usá actualizarTurnoCompleto
+    this.turnosSvc.actualizarTurnoParcial(this.turnoEditando.id, turnoActualizado).subscribe({
       next: () => {
         this.cargarTurnos();
         this.turnoEditando = null;
       },
       error: (err) => console.error('Error al actualizar turno:', err)
     });
-  }
-
-  validarTurnoEditando(): boolean {
-    if (!this.turnoEditando) return false;
-
-    const { fecha, hora, razon } = this.turnoEditando;
-    let valido = true;
-    const [anio, mes, dia] = fecha.split('-').map(Number);
-    const [h, m] = hora.split(':').map(Number);
-    const fechaHora = new Date(anio, mes - 1, dia, h, m);
-    const hoy = new Date();
-
-    if (!hora) {
-      this.erroresEdicion.hora = 'La hora es obligatoria';
-      valido = false;
-    }
-
-    if (!razon?.trim()) {
-      this.erroresEdicion.razon = 'La razón es obligatoria';
-      valido = false;
-    }
-
-    if (fechaHora < hoy || anio > 2050) {
-      this.erroresEdicion.fecha = 'Fecha inválida';
-      valido = false;
-    }
-
-    return valido;
   }
 
   cancelarEdicion(): void {
@@ -182,16 +152,16 @@ export class Turnos {
   eliminarTurno(id: number): void {
     if (!confirm('¿Seguro que querés eliminar este turno?')) return;
 
-    this.http.delete<void>(`https://backend-gestor-zfez.onrender.com/turnos/${id}`).subscribe({
-      next: () => {
-        this.turnos = this.turnos.filter(t => t.id !== id);
-      },
+    this.turnosSvc.eliminarTurno(id).subscribe({
+      next: () => (this.turnos = this.turnos.filter(t => t.id !== id)),
       error: (err) => console.error('Error al eliminar turno:', err)
     });
   }
 
   getFechaFormateada(fecha: string): string {
+    if (!fecha) return '—';
     const fechaObj = new Date(fecha);
+    // normalizo a local sin offset
     fechaObj.setMinutes(fechaObj.getMinutes() + fechaObj.getTimezoneOffset());
     const dia = fechaObj.getDate().toString().padStart(2, '0');
     const mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');

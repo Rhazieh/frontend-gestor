@@ -1,7 +1,11 @@
+// src/app/pacientes/pacientes.ts
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+
+import { PacientesService } from './pacientes.service';
+import { TurnosService } from '../turnos/turnos.service';
+
 import { Paciente } from '../models/paciente';
 import { Turno } from '../models/turno';
 
@@ -13,7 +17,8 @@ import { Turno } from '../models/turno';
   styleUrl: './pacientes.css'
 })
 export class Pacientes {
-  private http = inject(HttpClient);
+  private pacientesSvc = inject(PacientesService);
+  private turnosSvc = inject(TurnosService);
 
   pacientes: Paciente[] = [];
   nuevoPaciente: Partial<Paciente> = { nombre: '', email: '', telefono: '' };
@@ -28,7 +33,7 @@ export class Pacientes {
   }
 
   cargarPacientes(): void {
-    this.http.get<Paciente[]>('https://backend-gestor-zfez.onrender.com/pacientes').subscribe({
+    this.pacientesSvc.getPacientes().subscribe({
       next: (data) => (this.pacientes = data),
       error: (err) => console.error('Error al cargar pacientes:', err)
     });
@@ -39,7 +44,7 @@ export class Pacientes {
     this.errores = this.validarCampos(this.nuevoPaciente);
     if (Object.keys(this.errores).length > 0) return;
 
-    this.http.post<Paciente>('https://backend-gestor-zfez.onrender.com/pacientes', this.nuevoPaciente).subscribe({
+    this.pacientesSvc.crearPaciente(this.nuevoPaciente).subscribe({
       next: (pacienteCreado) => {
         this.pacientes.push(pacienteCreado);
         this.nuevoPaciente = { nombre: '', email: '', telefono: '' };
@@ -51,15 +56,16 @@ export class Pacientes {
   }
 
   eliminarPaciente(id: number): void {
-    this.http.get<Turno[]>('https://backend-gestor-zfez.onrender.com/turnos').subscribe({
-      next: (turnos) => {
+    // Consulto turnos para confirmar si tiene turnos asociados
+    this.turnosSvc.getTurnos().subscribe({
+      next: (turnos: Turno[]) => {
         const tieneTurnos = turnos.some(t => t.paciente?.id === id);
         const mensaje = tieneTurnos
-          ? '⚠️ Este paciente tiene turnos asignados. ¿Estás seguro de que querés eliminarlo?'
+          ? '⚠ Este paciente tiene turnos asignados. ¿Estás seguro de que querés eliminarlo?'
           : '¿Estás seguro de que querés eliminar este paciente?';
 
         if (confirm(mensaje)) {
-          this.http.delete<void>(`https://backend-gestor-zfez.onrender.com/pacientes/${id}`).subscribe({
+          this.pacientesSvc.eliminarPaciente(id).subscribe({
             next: () => (this.pacientes = this.pacientes.filter(p => p.id !== id)),
             error: (err) => console.error('Error al eliminar paciente:', err)
           });
@@ -79,10 +85,7 @@ export class Pacientes {
     this.erroresEdicion = this.validarCampos(this.pacienteEditando);
     if (Object.keys(this.erroresEdicion).length > 0) return;
 
-    this.http.patch<Paciente>(
-      `https://backend-gestor-zfez.onrender.com/pacientes/${this.pacienteEditando.id}`,
-      this.pacienteEditando
-    ).subscribe({
+    this.pacientesSvc.actualizarPaciente(this.pacienteEditando.id, this.pacienteEditando).subscribe({
       next: (pacienteActualizado) => {
         const index = this.pacientes.findIndex(p => p.id === pacienteActualizado.id);
         if (index !== -1) this.pacientes[index] = pacienteActualizado;
@@ -97,6 +100,7 @@ export class Pacientes {
     this.erroresEdicion = {};
   }
 
+  // --- Validaciones simples de UI ---
   private validarCampos(paciente: Partial<Paciente>): any {
     const errores: any = {};
 
