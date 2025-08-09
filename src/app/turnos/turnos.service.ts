@@ -1,32 +1,43 @@
-// src/app/turnos/turnos.service.ts
-// Servicio de Turnos centralizado: sin URLs hardcodeadas en componentes.
+// frontend-gestor/src/app/turnos/turnos.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, delay, retryWhen, scan, throwError } from 'rxjs';
 import { Turno } from '../models/turno';
 import { API_BASE } from '../config';
 
+function retry503(max = 3, waitMs = 1200) {
+  return retryWhen(errors =>
+    errors.pipe(
+      scan((acc, err: any) => {
+        if (acc >= max || (err?.status && err.status !== 503)) throw err;
+        return acc + 1;
+      }, 0),
+      delay(waitMs)
+    )
+  );
+}
+
 @Injectable({ providedIn: 'root' })
 export class TurnosService {
-  // Podés cambiar a '/appointments' cuando quieras usar alias inglés
-  private apiUrl = `${API_BASE}/turnos`;
+  private apiUrl = `${API_BASE}/turnos`; // o `${API_BASE}/appointments`
 
   constructor(private http: HttpClient) {}
 
   getTurnos(): Observable<Turno[]> {
-    return this.http.get<Turno[]>(this.apiUrl);
+    return this.http.get<Turno[]>(this.apiUrl).pipe(
+      retry503(),
+      catchError(err => throwError(() => err))
+    );
   }
 
   crearTurno(turno: Partial<Turno>): Observable<Turno> {
     return this.http.post<Turno>(this.apiUrl, turno);
   }
 
-  // PATCH parcial (compatibilidad con tu backend actual)
   actualizarTurnoParcial(id: number, turno: Partial<Turno>): Observable<Turno> {
     return this.http.patch<Turno>(`${this.apiUrl}/${id}`, turno);
   }
 
-  // PUT completo (si preferís cumplir literalmente el enunciado)
   actualizarTurnoCompleto(id: number, turno: Partial<Turno>): Observable<Turno> {
     return this.http.put<Turno>(`${this.apiUrl}/${id}`, turno);
   }
