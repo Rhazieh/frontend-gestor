@@ -11,6 +11,7 @@ import {
   MonoTypeOperatorFunction,
 } from 'rxjs';
 import { Paciente } from '../models/paciente';
+import { Turno } from '../models/turno';
 import { API_BASE } from '../config';
 
 // Reintento tipado para evitar TS2345
@@ -44,11 +45,15 @@ export class PacientesService {
   }
 
   actualizarPaciente(id: number, paciente: Partial<Paciente>): Observable<Paciente> {
-  return this.http.put<Paciente>(`${this.apiUrl}/${id}`, paciente);
-}
-
-
+    return this.http.put<Paciente>(`${this.apiUrl}/${id}`, paciente);
+  }
+  
   eliminarPaciente(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+  
+   // turnos por paciente (para confirmar borrado)
+  getAppointmentsByPatient(id: number): Observable<Turno[]> {
+    return this.http.get<Turno[]>(`${API_BASE}/patients/${id}/appointments`);
   }
 }

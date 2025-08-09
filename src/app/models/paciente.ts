@@ -5,5 +5,5 @@ export interface Paciente {
   nombre: string;
   email: string;
   telefono: string;
-  turnos: Turno[]; // 👈 importante para la relación, aunque no se use aún
+  turnos?: Turno[]; // opcional para que cuadre con el template (?.length)
 }

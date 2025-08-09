@@ -55,11 +55,11 @@ export class Pacientes {
     });
   }
 
-  eliminarPaciente(id: number): void {
-    // Consulto turnos para confirmar si tiene turnos asociados
-    this.turnosSvc.getTurnos().subscribe({
+   eliminarPaciente(id: number): void {
+    // Confirmo con turnos del paciente (endpoint dedicado)
+    this.pacientesSvc.getAppointmentsByPatient(id).subscribe({
       next: (turnos: Turno[]) => {
-        const tieneTurnos = turnos.some(t => t.paciente?.id === id);
+        const tieneTurnos = (turnos?.length ?? 0) > 0;
         const mensaje = tieneTurnos
           ? '⚠ Este paciente tiene turnos asignados. ¿Estás seguro de que querés eliminarlo?'
           : '¿Estás seguro de que querés eliminar este paciente?';

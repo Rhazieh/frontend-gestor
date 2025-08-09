@@ -97,6 +97,14 @@ export class Turnos {
       this.errores.fecha = 'La fecha es obligatoria';
       valido = false;
     }
+    if (fecha) {
+      const hoy = new Date(); hoy.setHours(0,0,0,0);
+      const f = new Date(fecha);
+      if (isNaN(f.getTime()) || f < hoy) {
+        this.errores.fecha = 'La fecha debe ser hoy o futura';
+        valido = false;
+      }
+    }
     if (!hora) {
       this.errores.hora = 'La hora es obligatoria';
       valido = false;
