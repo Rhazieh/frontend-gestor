@@ -186,5 +186,3 @@ export class Pacientes {
     return regex.test(telefono);
   }
 }
-
-// — Siguiente archivo recomendado: src/app/pacientes/pacientes.html
