@@ -100,8 +100,4 @@ export class TurnosService {
   }
 }
 
-// -----------------------------------------------------------------------------
-// 📌 Siguiente archivo recomendado para seguir:
-//   "src/app/turnos/turnos.ts" y luego "src/app/turnos/turnos.html"
-//   (el componente que consume este servicio y su template).
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
