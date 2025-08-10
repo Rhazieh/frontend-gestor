@@ -1,3 +1,14 @@
+// frontend-gestor/src/app/turnos/turnos.ts
+// -----------------------------------------------------------------------------
+// Componente Angular que maneja la pantalla de TURNOS (listar, filtrar, crear,
+// editar y eliminar). Es un componente standalone (no usa NgModule) y se apoya
+// en dos servicios:
+//   - TurnosService: llamadas HTTP a /turnos (backend).
+//   - PacientesService: para poblar el <select> de pacientes.
+// También contiene validaciones básicas en el cliente (fecha/hora, razón, etc.).
+// Su HTML asociado está en: ./turnos.html
+// -----------------------------------------------------------------------------
+
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,22 +20,26 @@ import { Turno } from '../models/turno';
 import { Paciente } from '../models/paciente';
 
 @Component({
-  selector: 'app-turnos',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './turnos.html',
-  styleUrl: './turnos.css'
+  selector: 'app-turnos',            // etiqueta usada por el router para renderizar
+  standalone: true,                  // componente independiente (Angular moderno)
+  imports: [CommonModule, FormsModule], // necesito *ngFor, *ngIf y [(ngModel)]
+  templateUrl: './turnos.html',      // template con la UI
+  styleUrl: './turnos.css'           // estilos específicos de este componente
 })
 export class Turnos {
+  // Inyección con API "inject": más simple que constructor(private svc: Svc) {}
   private turnosSvc = inject(TurnosService);
   private pacientesSvc = inject(PacientesService);
 
-  turnos: Turno[] = [];
-  pacientes: Paciente[] = [];
+  // Estado de la vista
+  turnos: Turno[] = [];              // lista completa traída del backend
+  pacientes: Paciente[] = [];        // lista para el combo <select>
 
-  filtroFecha: string = '';
+  // Filtros de la grilla
+  filtroFecha: string = '';          // 'YYYY-MM-DD'
   filtroPacienteId: number | null = null;
 
+  // Modelo del formulario "crear turno"
   nuevoTurno = {
     fecha: '',
     hora: '',
@@ -32,17 +47,24 @@ export class Turnos {
     pacienteId: null as number | null
   };
 
+  // Edición inline (si hay un turno seleccionado para editar)
   turnoEditando: Turno | null = null;
 
+  // Errores de validación para crear/editar
   errores: any = {};
   erroresEdicion: any = {};
-  intentoEnviar = false;
+  intentoEnviar = false;             // marca si intenté enviar para mostrar errores
 
   constructor() {
+    // Al montar el componente, cargo datos iniciales
     this.cargarTurnos();
     this.cargarPacientes();
   }
 
+  // ---------------------------------------------------------------------------
+  // Trae turnos del backend y normaliza la hora a "HH:MM"
+  // (por si el backend devuelve "HH:MM:SS").
+  // ---------------------------------------------------------------------------
   cargarTurnos(): void {
     this.turnosSvc.getTurnos().subscribe({
       next: (data) => {
@@ -56,6 +78,9 @@ export class Turnos {
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // Carga la lista de pacientes para el <select> del formulario.
+  // ---------------------------------------------------------------------------
   cargarPacientes(): void {
     this.pacientesSvc.getPacientes().subscribe({
       next: (data) => (this.pacientes = data),
@@ -63,6 +88,11 @@ export class Turnos {
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // Getter computado: aplica filtros en memoria sobre `turnos`.
+  // - Fecha: comparo strings 'YYYY-MM-DD' para evitar líos de timezone.
+  // - Paciente: compara por id.
+  // ---------------------------------------------------------------------------
   get turnosFiltrados(): Turno[] {
     return this.turnos.filter(t => {
       // comparo por string YYYY-MM-DD para evitar timezone raros
@@ -77,6 +107,12 @@ export class Turnos {
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // Crea un turno nuevo:
+  // - Marca intentoEnviar para mostrar mensajes si falta algo.
+  // - Valida campos mínimos y coherencia de fecha/hora.
+  // - Llama al servicio y resetea el formulario si sale bien.
+  // ---------------------------------------------------------------------------
   crearTurno(): void {
     this.intentoEnviar = true;
     this.errores = {};
@@ -95,6 +131,11 @@ export class Turnos {
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // Validación de alta (cliente):
+  // - Requeridos: fecha, hora, razón, pacienteId.
+  // - Coherencia: fecha/hora deben ser presentes o futuras y año <= 2050.
+  // ---------------------------------------------------------------------------
   validarNuevoTurno(): boolean {
     const { fecha, hora, razon, pacienteId } = this.nuevoTurno;
     let valido = true;
@@ -121,6 +162,10 @@ export class Turnos {
     return valido;
   }
 
+  // ---------------------------------------------------------------------------
+  // Pasa el turno a modo edición: clona datos y normaliza hora a "HH:MM"
+  // para que el <input type="time"> lo acepte.
+  // ---------------------------------------------------------------------------
   editarTurno(turno: Turno): void {
     // normalizo la hora para el <input type="time">
     this.turnoEditando = {
@@ -131,6 +176,12 @@ export class Turnos {
     this.erroresEdicion = {};
   }
 
+  // ---------------------------------------------------------------------------
+  // Guarda los cambios de la edición:
+  // - Valida hora/razón y coherencia de fecha.
+  // - Arma el payload con pacienteId para el backend.
+  // - Llama PATCH (podría ser PUT) y refresca la lista.
+  // ---------------------------------------------------------------------------
   guardarEdicion(): void {
     if (!this.turnoEditando) return;
 
@@ -170,10 +221,14 @@ export class Turnos {
     });
   }
 
+  // Cancela la edición y oculta el formulario
   cancelarEdicion(): void {
     this.turnoEditando = null;
   }
 
+  // ---------------------------------------------------------------------------
+  // Elimina un turno por ID con confirmación previa.
+  // ---------------------------------------------------------------------------
   eliminarTurno(id: number): void {
     if (!confirm('¿Seguro que querés eliminar este turno?')) return;
 
@@ -183,6 +238,9 @@ export class Turnos {
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // Formatea la fecha recibida (string) a "DD/MM/YYYY", evitando problemas de TZ.
+  // ---------------------------------------------------------------------------
   getFechaFormateada(fecha: string): string {
     if (!fecha) return '—';
     // Evito timezone: parseo el string "YYYY-MM-DD" directo
@@ -195,3 +253,9 @@ export class Turnos {
     return `${dd}/${mm}/${yyyy}`;
   }
 }
+
+// -----------------------------------------------------------------------------
+// 📌 Siguiente archivo recomendado para seguir:
+//   1) "src/app/turnos/turnos.html"  (template del componente)
+//   2) Luego "src/app/pacientes/pacientes.service.ts" y "src/app/pacientes/pacientes.ts"
+// -----------------------------------------------------------------------------
