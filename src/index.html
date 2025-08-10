@@ -1,13 +1,56 @@
+
 <!doctype html>
+<!--
+  index.html
+  ──────────────────────────────────────────────────────────────
+  🏠 Archivo HTML raíz que entrega el servidor (Netlify).
+  Angular se “monta” acá reemplazando la etiqueta <app-root>
+  por el árbol de componentes de la app.
+  No es un template: este archivo se sirve tal cual.
+  ──────────────────────────────────────────────────────────────
+-->
+
 <html lang="en">
 <head>
+  <!--
+    <meta charset="utf-8">
+    Define la codificación de caracteres (UTF-8) para soportar tildes, ñ, etc.
+  -->
   <meta charset="utf-8">
+
+  <!--
+    <title>
+    Título que verás en la pestaña del navegador. No afecta a Angular directamente.
+  -->
   <title>FrontendGestor</title>
+
+  <!--
+    <base href="/">
+    MUY IMPORTANTE para el enrutador de Angular.
+    - En producción (Netlify en la raíz del dominio) debe ser "/".
+    - Si desplegás bajo una subcarpeta (ej. https://sitio.com/app/),
+      tendrías que cambiarlo a "<base href='/app/'>".
+    Si esto está mal, las rutas/recursos (CSS/JS) pueden romperse al recargar.
+  -->
   <base href="/">
+
+  <!--
+    Responsive para móviles. Hace que el layout escale según el ancho del dispositivo.
+  -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!--
+    Favicon del sitio. La ruta es relativa al "base href".
+    Si no aparece, verificá que /public/favicon.ico exista (Angular copia /public a /dist).
+  -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
+  <!--
+    Punto de montaje de Angular.
+    bootstrapApplication(App) (en src/main.ts) reemplaza esta etiqueta por el componente raíz.
+    Todo el resto de la app (navbar, rutas, vistas) “vive” dentro de App.
+  -->
   <app-root></app-root>
 </body>
 </html>
