@@ -1,6 +1,22 @@
-<!-- Acá va el navbar fijo arriba de toda la aplicación.
-     Sirve para cambiar entre la vista de pacientes y la de turnos.
-     Usa routerLink para que Angular cambie de ruta sin recargar la página. -->
+<!-- src/app/navbar/navbar.html -->
+<!--
+🌐 Qué es esto:
+Plantilla (HTML) del componente <app-navbar>. Aparece en todas las páginas
+porque el AppComponent lo incluye en app.html.
+
+🚦 Navegación sin recargar:
+- `routerLink` cambia de ruta con el Router de Angular (SPA).
+- `routerLinkActive="active"` le agrega la clase CSS "active" cuando la ruta coincide.
+  Esa clase la podés estilizar en navbar.css (por ejemplo, subrayado o color distinto).
+
+🔗 Requisitos:
+Este HTML asume que el componente Navbar (navbar.ts) importó RouterLink y RouterLinkActive.
+Si no, Angular no entenderá estas directivas.
+
+🧭 Rutas esperadas:
+- /pacientes  → componente Pacientes
+- /turnos     → componente Turnos
+-->
 
 <nav>
   <!-- Botón que te lleva a la vista de pacientes -->
@@ -9,3 +25,6 @@
   <!-- Botón que te lleva a la vista de turnos -->
   <a routerLink="/turnos" routerLinkActive="active">Turnos</a>
 </nav>
+
+<!-- ▶ Siguiente archivo recomendado: src/app/navbar/navbar.ts (lógica del componente) -->
+```0
