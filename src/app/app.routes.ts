@@ -1,6 +1,6 @@
 // src/app/app.routes.ts
 // ──────────────────────────────────────────────────────────────────────
-// 📌 Definición de rutas (enrutador) del frontend.
+//  Definición de rutas (enrutador) del frontend.
 // - Cuando la URL cambia, Angular decide qué componente dibujar en <router-outlet>.
 // - Acá mapeamos cada "path" a un componente concreto.
 //
@@ -17,13 +17,13 @@ import { Pacientes } from './pacientes/pacientes';
 import { Turnos } from './turnos/turnos';
 
 export const routes: Routes = [
-  // ⛳ Raíz -> redirige a /pacientes
+  //  Raíz -> redirige a /pacientes
   { path: '', redirectTo: 'pacientes', pathMatch: 'full' },
 
-  // 👥 Lista/ABM de Pacientes
+  //  Lista/ABM de Pacientes
   { path: 'pacientes', component: Pacientes },
 
-  // 📅 Lista/ABM de Turnos
+  //  Lista/ABM de Turnos
   { path: 'turnos', component: Turnos },
 
   // (Opcional recomendado) Ruta comodín 404:
