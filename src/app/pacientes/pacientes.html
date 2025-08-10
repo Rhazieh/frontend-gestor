@@ -1,3 +1,18 @@
+<!--
+  src/app/pacientes/pacientes.html
+  ------------------------------------------------------------------------------
+  Qué hace esta vista:
+  - Muestra una tabla con todos los pacientes (propiedad `pacientes` del componente).
+  - Tiene un formulario para crear pacientes.
+  - Tiene un formulario (condicional) para editar el paciente seleccionado.
+
+  Notas rápidas:
+  - `*ngFor` recorre el array y genera una <tr> por paciente.
+  - `[(ngModel)]` enlaza inputs con propiedades del componente (two-way binding).
+  - Los <small class="error"> aparecen si hay mensajes en los objetos de errores.
+  ------------------------------------------------------------------------------
+-->
+
 <h2>Lista de Pacientes</h2>
 
 <table>
@@ -12,13 +27,17 @@
     </tr>
   </thead>
   <tbody>
+    <!-- Recorremos `pacientes` y pintamos una fila por cada uno -->
     <tr *ngFor="let paciente of pacientes">
+      <!-- Interpolación {{ ... }} para mostrar valores -->
       <td>{{ paciente.id }}</td>
       <td>{{ paciente.nombre }}</td>
       <td>{{ paciente.email }}</td>
       <td>{{ paciente.telefono }}</td>
+      <!-- Si no hay turnos, mostramos 0 con `?.length || 0` -->
       <td>{{ paciente.turnos?.length || 0 }}</td>
       <td>
+        <!-- Botones: llaman a métodos del componente -->
         <button (click)="editarPaciente(paciente)">Editar</button>
         <button class="eliminar" (click)="eliminarPaciente(paciente.id)">Eliminar</button>
       </td>
@@ -29,10 +48,25 @@
 <hr />
 
 <h3>Crear Paciente</h3>
+<!--
+  (ngSubmit)="crearPaciente()":
+  - Cuando el form se envía (Enter o click en submit), llama al método crearPaciente().
+  #formCrear="ngForm":
+  - Referencia local al formulario (útil si quisieras consultar estado/validez).
+  novalidate:
+  - Desactiva validación HTML nativa; validamos nosotros en el componente.
+-->
 <form (ngSubmit)="crearPaciente()" #formCrear="ngForm" novalidate>
   <label>
     Nombre y Apellido:
+    <!--
+      [(ngModel)]="nuevoPaciente.nombre":
+      - Enlaza el input con `nuevoPaciente.nombre` (two-way).
+      name="nombre" es obligatorio para que ngModel funcione dentro de <form>.
+      maxlength: límite visual de caracteres.
+    -->
     <input type="text" [(ngModel)]="nuevoPaciente.nombre" name="nombre" maxlength="30" />
+    <!-- Mensaje de error si hay errores.nombre y el usuario intentó enviar -->
     <small class="error" *ngIf="errores.nombre && intentoEnviar">{{ errores.nombre }}</small>
   </label>
   <br />
@@ -54,6 +88,12 @@
 <hr />
 
 <h3>Editar Paciente</h3>
+<!--
+  *ngIf="pacienteEditando":
+  - Este form sólo aparece cuando el usuario apretó "Editar" y seteaste un paciente.
+  (ngSubmit)="actualizarPaciente()":
+  - Llama al método que hace el PUT al backend y actualiza la tabla.
+-->
 <form *ngIf="pacienteEditando" (ngSubmit)="actualizarPaciente()" #formEdit="ngForm" novalidate>
   <label>
     Nombre y Apellido:
@@ -74,5 +114,8 @@
   </label>
   <br />
   <button type="submit">Actualizar</button>
+  <!-- Cancela edición y oculta este formulario -->
   <button type="button" (click)="cancelarEdicion()">Cancelar</button>
 </form>
+
+<!-- — Siguiente archivo recomendado: src/app/pacientes/pacientes.service.ts -->
