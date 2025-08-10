@@ -1,8 +1,18 @@
-<!-- Filtro por fecha y paciente -->
+<!-- src/app/turnos/turnos.html
+     Vista/template del componente Turnos.
+     Acá se muestra: filtros, grilla de turnos, formulario de alta y formulario de edición.
+     Usa binding bidireccional [(ngModel)], directivas *ngFor/*ngIf y eventos (click), (ngSubmit).
+-->
+
+<!-- ===================== FILTROS ===================== -->
+<!-- Filtro por fecha: bindea con [(ngModel)] a la propiedad filtroFecha (string 'YYYY-MM-DD') -->
 <label>
   Filtrar por fecha:
   <input type="date" [(ngModel)]="filtroFecha" name="filtroFecha" />
 </label>
+
+<!-- Filtro por paciente: bindea con [(ngModel)] a filtroPacienteId (number|null).
+     La opción "Todos" manda null. El listado se arma con *ngFor sobre pacientes. -->
 <label>
   Filtrar por paciente:
   <select [(ngModel)]="filtroPacienteId" name="filtroPacienteId">
@@ -14,8 +24,10 @@
 </label>
 <br />
 
+<!-- ===================== LISTA / GRILLA ===================== -->
 <h2>Lista de Turnos</h2>
 
+<!-- Tabla simple que recorre turnosFiltrados (getter en el componente) -->
 <table>
   <thead>
     <tr>
@@ -28,13 +40,16 @@
     </tr>
   </thead>
   <tbody>
+    <!-- *ngFor crea una fila por cada turno -->
     <tr *ngFor="let turno of turnosFiltrados">
       <td>{{ turno.id }}</td>
+      <!-- getFechaFormateada evita problemas de timezone y muestra DD/MM/YYYY -->
       <td>{{ getFechaFormateada(turno.fecha) }}</td>
       <td>{{ turno.hora }}</td>
       <td>{{ turno.razon }}</td>
       <td>{{ turno.paciente?.nombre || 'Sin asignar' }}</td>
       <td>
+        <!-- Eventos (click) llaman a métodos del componente -->
         <button (click)="editarTurno(turno)">Editar</button>
         <button class="eliminar" (click)="eliminarTurno(turno.id)">Eliminar</button>
       </td>
@@ -44,11 +59,16 @@
 
 <hr />
 
+<!-- ===================== FORMULARIO: CREAR ===================== -->
 <h3>Crear Turno</h3>
 
+<!-- (ngSubmit) dispara crearTurno().
+     #formTurno es una referencia local al formulario (por si quisieras leer estado).
+     novalidate: desactiva validación HTML nativa; validamos manualmente en TS. -->
 <form (ngSubmit)="crearTurno()" #formTurno="ngForm" novalidate>
   <label>
     Fecha:
+    <!-- [(ngModel)] hace two-way binding con nuevoTurno.fecha -->
     <input
       type="date"
       [(ngModel)]="nuevoTurno.fecha"
@@ -56,6 +76,7 @@
       required
       max="2050-12-31"
     />
+    <!-- Muestra error si existe errores.fecha y el user intentó enviar -->
     <small class="error" *ngIf="errores.fecha && intentoEnviar">{{ errores.fecha }}</small>
   </label>
   <br />
@@ -83,14 +104,17 @@
   <br />
   <label>
     Paciente:
+    <!-- El select guarda directamente el id numérico del paciente en nuevoTurno.pacienteId -->
     <select
       [(ngModel)]="nuevoTurno.pacienteId"
       name="pacienteId"
       required
     >
+      <!-- Opción placeholder deshabilitada -->
       <option [ngValue]="null" disabled selected>
         -- Seleccionar paciente --
       </option>
+      <!-- Opciones generadas desde this.pacientes -->
       <option
         *ngFor="let paciente of pacientes"
         [ngValue]="paciente.id"
@@ -106,11 +130,15 @@
 
 <hr />
 
+<!-- ===================== FORMULARIO: EDITAR ===================== -->
 <h3>Editar Turno</h3>
 
+<!-- Solo se muestra si turnoEditando != null -->
 <form *ngIf="turnoEditando" (ngSubmit)="guardarEdicion()" #formEdit="ngForm" novalidate>
   <label>
     Fecha:
+    <!-- Fecha deshabilitada en edición (política actual del UI).
+         Sigue bindeada para mostrar el valor. -->
     <input
       type="date"
       [(ngModel)]="turnoEditando.fecha"
@@ -144,6 +172,8 @@
   <br />
   <label>
     Paciente:
+    <!-- Combo deshabilitado en edición (mantener paciente).
+         Se muestra el nombre actual. -->
     <select
       [(ngModel)]="turnoEditando.paciente.id"
       name="editPacienteId"
@@ -161,3 +191,10 @@
   <button type="submit">Guardar Cambios</button>
   <button type="button" (click)="cancelarEdicion()">Cancelar</button>
 </form>
+
+<!--
+  📌 Siguiente archivo recomendado para seguir:
+    1) "src/app/turnos/turnos.service.ts" (servicio HTTP usado por este template)
+    2) Luego "src/app/pacientes/pacientes.service.ts" y "src/app/pacientes/pacientes.html"
+-->
+```0
