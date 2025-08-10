@@ -37,3 +37,54 @@ https://marvelous-chebakia-5cb46f.netlify.app/pacientes
 
 Repositorio del backend:  
 https://github.com/Rhazieh/backend-gestor
+
+Indice recomendado de lectura:
+1. frontend-gestor/src/main.ts
+
+
+2. frontend-gestor/src/app/app.ts
+
+
+3. frontend-gestor/src/app/app.html
+
+
+4. frontend-gestor/src/app/app.routes.ts
+
+
+5. frontend-gestor/src/app/config.ts
+
+
+6. frontend-gestor/src/app/navbar/navbar.ts
+
+
+7. frontend-gestor/src/app/navbar/navbar.html
+
+
+8. frontend-gestor/src/app/models/paciente.ts
+
+
+9. frontend-gestor/src/app/models/turno.ts
+
+
+10. frontend-gestor/src/app/pacientes/pacientes.service.ts
+
+
+11. frontend-gestor/src/app/pacientes/pacientes.ts
+
+
+12. frontend-gestor/src/app/pacientes/pacientes.html
+
+
+13. frontend-gestor/src/app/turnos/turnos.service.ts
+
+
+14. frontend-gestor/src/app/turnos/turnos.ts
+
+
+15. frontend-gestor/src/app/turnos/turnos.html
+
+
+16. frontend-gestor/src/index.html
+
+
+17. frontend-gestor/src/styles.css
