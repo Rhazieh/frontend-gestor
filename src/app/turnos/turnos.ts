@@ -254,8 +254,4 @@ export class Turnos {
   }
 }
 
-// -----------------------------------------------------------------------------
-// 📌 Siguiente archivo recomendado para seguir:
-//   1) "src/app/turnos/turnos.html"  (template del componente)
-//   2) Luego "src/app/pacientes/pacientes.service.ts" y "src/app/pacientes/pacientes.ts"
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
