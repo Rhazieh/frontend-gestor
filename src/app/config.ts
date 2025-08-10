@@ -26,14 +26,10 @@ export const API_BASE =
     : PROD_API;               // Producción (Render)
 
 // -----------------------------------------------------------------------------
-// 📌 ¿Cómo se usa?
+//  ¿Cómo se usa?
 //   import { API_BASE } from '../config';
 //   this.http.get(`${API_BASE}/pacientes`)
 //   this.http.post(`${API_BASE}/turnos`, body) ...
 //
 // Ventaja: si mañana cambia la URL del backend, la tocás acá una sola vez.
-// -----------------------------------------------------------------------------
-//
-// 📚 Siguiente archivo recomendado para seguir:
-//   "src/app/turnos/turnos.service.ts"  → consume `${API_BASE}/turnos`.
 // -----------------------------------------------------------------------------
