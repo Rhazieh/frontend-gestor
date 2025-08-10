@@ -1,7 +1,7 @@
 
 // src/app/app.ts
-// ──────────────────────────────────────────────────────────────────────
-// 📌 Componente raíz de Angular (standalone)
+// ─────────────────────────────────────────────────────────────────────
+//  Componente raíz de Angular (standalone)
 // - Es el punto de arranque visual del frontend.
 // - Importa el navbar y habilita el enrutador para que <router-outlet>
 //   pueda renderizar las páginas (Pacientes / Turnos).
@@ -25,7 +25,7 @@ import { HttpClientModule } from '@angular/common/http'; // Habilita HttpClient 
   styleUrl: './app.css'              // Estilos específicos del componente raíz
 })
 export class App {
-  // 🧠 signal(): estado reactivo nativo de Angular.
+  //  signal(): estado reactivo nativo de Angular.
   // No lo usamos en la UI por ahora, pero queda como ejemplo.
   protected readonly title = signal('frontend-gestor');
 }
