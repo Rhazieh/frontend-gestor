@@ -1,6 +1,6 @@
 // src/app/navbar/navbar.ts
 // ─────────────────────────────────────────────────────────────────────────────
-// 🧭 Componente Navbar
+//  Componente Navbar
 // Qué es: barra de navegación superior presente en toda la app.
 //
 // Para qué sirve:
@@ -29,6 +29,3 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   styleUrl: './navbar.css'                // Estilos del navbar
 })
 export class Navbar {}
-
-// ▶ Siguiente archivo recomendado: src/app/app.html (donde se usa <app-navbar> y <router-outlet>)
-```0
