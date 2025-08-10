@@ -87,5 +87,3 @@ export class PacientesService {
     return this.http.get<Turno[]>(`${API_BASE}/patients/${id}/appointments`);
   }
 }
-
-// — Siguiente archivo recomendado: src/app/pacientes/pacientes.ts
