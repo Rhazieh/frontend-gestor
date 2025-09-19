@@ -32,3 +32,37 @@ bootstrapApplication(App, {
 //   provideRouter(routes),
 //   provideAnimations()
 // ]
+
+/**
+ * Guía de lectura (Frontend - Angular standalone)
+ * ----------------------------------------------------------------------------
+ * ¿Qué hay acá?
+ * - Bootstrap de la app (sin NgModules), router y HttpClient global.
+ *
+ * ¿Por dónde empiezo a leer?
+ * 1) src/app/app.ts
+ *    - Componente raíz (standalone). Renderiza navbar + <router-outlet>.
+ * 2) src/app/app.routes.ts
+ *    - Definición de rutas: 'pacientes' y 'turnos'.
+ * 3) src/app/pacientes/* y src/app/turnos/*
+ *    - Cada feature tiene componente + servicio + HTML/CSS.
+ * 4) src/app/config.ts
+ *    - API_BASE: decide si apuntar a http://localhost:3000 (dev) o Render (prod).
+ *
+ * Flujo típico:
+ * - Un componente (p.ej. Pacientes) llama a su service -> HttpClient
+ *   hace la request usando API_BASE -> backend responde -> el componente
+ *   actualiza el estado y el template refleja los cambios.
+ *
+ * Archivos clave (lectura sugerida):
+ * - src/app/pacientes/pacientes.ts / .html / .css
+ * - src/app/pacientes/pacientes.service.ts
+ * - src/app/turnos/turnos.ts / .html / .css
+ * - src/app/turnos/turnos.service.ts
+ * - src/app/config.ts
+ *
+ * Extensiones simples:
+ * - Interceptores para manejar errores globales o auth tokens.
+ * - Guards de rutas si agregás autenticación.
+ * - Lazy loading si crecen las features.
+ */
