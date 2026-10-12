@@ -1,0 +1,119 @@
+<!--
+  src/app/pacientes/pacientes.html
+  ------------------------------------------------------------------------------
+  Qué hace esta vista:
+  - Muestra una tabla con todos los pacientes (propiedad `pacientes` del componente).
+  - Tiene un formulario para crear pacientes.
+  - Tiene un formulario (condicional) para editar el paciente seleccionado.
+
+  Notas rápidas:
+  - `*ngFor` recorre el array y genera una <tr> por paciente.
+  - `[(ngModel)]` enlaza inputs con propiedades del componente (two-way binding).
+  - Los <small class="error"> aparecen si hay mensajes en los objetos de errores.
+  ------------------------------------------------------------------------------
+-->
+
+<h2>Lista de Pacientes</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Email</th>
+      <th>Teléfono</th>
+      <th>Turnos</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Recorremos `pacientes` y pintamos una fila por cada uno -->
+    <tr *ngFor="let paciente of pacientes">
+      <!-- Interpolación {{ ... }} para mostrar valores -->
+      <td>{{ paciente.id }}</td>
+      <td>{{ paciente.nombre }}</td>
+      <td>{{ paciente.email }}</td>
+      <td>{{ paciente.telefono }}</td>
+      <!-- Si no hay turnos, mostramos 0 con `?.length || 0` -->
+      <td>{{ paciente.turnos?.length || 0 }}</td>
+      <td>
+        <!-- Botones: llaman a métodos del componente -->
+        <button (click)="editarPaciente(paciente)">Editar</button>
+        <button class="eliminar" (click)="eliminarPaciente(paciente.id)">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h3>Crear Paciente</h3>
+<!--
+  (ngSubmit)="crearPaciente()":
+  - Cuando el form se envía (Enter o click en submit), llama al método crearPaciente().
+  #formCrear="ngForm":
+  - Referencia local al formulario (útil si quisieras consultar estado/validez).
+  novalidate:
+  - Desactiva validación HTML nativa; validamos nosotros en el componente.
+-->
+<form (ngSubmit)="crearPaciente()" #formCrear="ngForm" novalidate>
+  <label>
+    Nombre y Apellido:
+    <!--
+      [(ngModel)]="nuevoPaciente.nombre":
+      - Enlaza el input con `nuevoPaciente.nombre` (two-way).
+      name="nombre" es obligatorio para que ngModel funcione dentro de <form>.
+      maxlength: límite visual de caracteres.
+    -->
+    <input type="text" [(ngModel)]="nuevoPaciente.nombre" name="nombre" maxlength="30" />
+    <!-- Mensaje de error si hay errores.nombre y el usuario intentó enviar -->
+    <small class="error" *ngIf="errores.nombre && intentoEnviar">{{ errores.nombre }}</small>
+  </label>
+  <br />
+  <label>
+    Email:
+    <input type="email" [(ngModel)]="nuevoPaciente.email" name="email" maxlength="30" />
+    <small class="error" *ngIf="errores.email && intentoEnviar">{{ errores.email }}</small>
+  </label>
+  <br />
+  <label>
+    Teléfono:
+    <input type="text" [(ngModel)]="nuevoPaciente.telefono" name="telefono" maxlength="15" />
+    <small class="error" *ngIf="errores.telefono && intentoEnviar">{{ errores.telefono }}</small>
+  </label>
+  <br />
+  <button type="submit">Crear</button>
+</form>
+
+<hr />
+
+<h3>Editar Paciente</h3>
+<!--
+  *ngIf="pacienteEditando":
+  - Este form sólo aparece cuando el usuario apretó "Editar" y seteaste un paciente.
+  (ngSubmit)="actualizarPaciente()":
+  - Llama al método que hace el PUT al backend y actualiza la tabla.
+-->
+<form *ngIf="pacienteEditando" (ngSubmit)="actualizarPaciente()" #formEdit="ngForm" novalidate>
+  <label>
+    Nombre y Apellido:
+    <input type="text" [(ngModel)]="pacienteEditando.nombre" name="editNombre" maxlength="30" />
+    <small class="error" *ngIf="erroresEdicion.nombre">{{ erroresEdicion.nombre }}</small>
+  </label>
+  <br />
+  <label>
+    Email:
+    <input type="email" [(ngModel)]="pacienteEditando.email" name="editEmail" maxlength="30" />
+    <small class="error" *ngIf="erroresEdicion.email">{{ erroresEdicion.email }}</small>
+  </label>
+  <br />
+  <label>
+    Teléfono:
+    <input type="text" [(ngModel)]="pacienteEditando.telefono" name="editTelefono" maxlength="15" />
+    <small class="error" *ngIf="erroresEdicion.telefono">{{ erroresEdicion.telefono }}</small>
+  </label>
+  <br />
+  <button type="submit">Actualizar</button>
+  <!-- Cancela edición y oculta este formulario -->
+  <button type="button" (click)="cancelarEdicion()">Cancelar</button>
+</form>

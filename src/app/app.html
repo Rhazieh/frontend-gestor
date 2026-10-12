@@ -1,0 +1,22 @@
+<!-- src/app/app.html
+────────────────────────────────────────────────────────────────────────
+ Plantilla del componente raíz (App)
+
+Qué hace este archivo:
+- Muestra SIEMPRE el navbar en la parte superior.
+- Deja un "hueco" con <router-outlet> para renderizar la vista
+  correspondiente según la URL (pacientes o turnos).
+
+Pistas rápidas:
+- <app-navbar> es el componente de navegación (links a /pacientes y /turnos).
+- <router-outlet> es el punto donde Angular inyecta el componente de la ruta
+  activa. No recarga la página, solo cambia la vista.
+
+No hay lógica acá; toda la “magia” la hacen el enrutado y los componentes
+standalone que ya definiste en app.routes.ts.
+────────────────────────────────────────────────────────────────────────
+-->
+
+<app-navbar></app-navbar> <!-- Navbar fijo con los botones de navegación -->
+
+<router-outlet></router-outlet> <!-- Zona donde se dibuja la ruta activa -->

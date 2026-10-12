@@ -1,0 +1,26 @@
+nav {
+  background-color: #2a2a3d;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #444;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+nav a {
+  color: #c9b4ff;
+  text-decoration: none;
+  font-weight: bold;
+  margin-right: 16px;
+  transition: color 0.3s ease;
+}
+
+nav a:hover {
+  color: #ffffff;
+}
+
+nav .nav-links {
+  display: flex;
+  gap: 12px;
+}

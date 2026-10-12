@@ -1,0 +1,38 @@
+/* Componentes pacientes y turnos */
+form {
+  background-color: #2a2a3d;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  border: 1px solid #444;
+  max-width: 600px;
+}
+
+input, select {
+  background-color: #2f2f45;
+  color: #f0f0f0;
+  border: 1px solid #555;
+}
+
+input:focus, select:focus {
+  border-color: #8f7ce2;
+}
+
+button {
+  background-color: #5b3cc4;
+  color: #fff;
+  font-weight: bold;
+}
+
+button:hover {
+  background-color: #6d4ee6;
+}
+/* Botón eliminar rojo */
+button.eliminar {
+  background-color: #c44545;
+  margin-left: 10px;
+}
+
+button.eliminar:hover {
+  background-color: #e74c3c;
+}
