@@ -47,7 +47,7 @@
       <td>{{ getFechaFormateada(turno.fecha) }}</td>
       <td>{{ turno.hora }}</td>
       <td>{{ turno.razon }}</td>
-      <td>{{ turno.paciente?.nombre || 'Sin asignar' }}</td>
+      <td>{{ turno.paciente.nombre || 'Sin asignar' }}</td>
       <td>
         <!-- Eventos (click) llaman a métodos del componente -->
         <button (click)="editarTurno(turno)">Editar</button>

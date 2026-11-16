@@ -1,3 +1,9 @@
+# Gestor de Turnos Médicos - Frontend
+
+[![Frontend CI](https://github.com/Rhazieh/frontend-gestor/actions/workflows/ci.yml/badge.svg)](https://github.com/Rhazieh/frontend-gestor/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/Rhazieh/frontend-gestor/graph/badge.svg)](https://codecov.io/gh/Rhazieh/frontend-gestor)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/cece100495774faea251c04f8ba749cd)](https://app.codacy.com/gh/Rhazieh/frontend-gestor/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
 Este es el frontend del proyecto "Gestor de Turnos Médicos", hecho en Angular. Permite gestionar pacientes y turnos desde una interfaz web conectada al backend (NestJS + PostgreSQL). Está desplegado en Netlify.
 
 Tecnologías principales:

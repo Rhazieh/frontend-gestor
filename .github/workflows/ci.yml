@@ -23,5 +23,15 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Correr tests de Angular
-        run: npm test -- --watch=false --browsers=ChromeHeadless
+      - name: Correr tests de Angular con cobertura
+        run: npm run test:ci -- --code-coverage
+
+      - name: Compilar aplicación
+        run: npm run build
+
+      - name: Subir cobertura a Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/frontend-gestor/lcov.info
+          fail_ci_if_error: false
